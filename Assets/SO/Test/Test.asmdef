@@ -1,0 +1,20 @@
+{
+    "name": "Test",
+    "rootNamespace": "SO.Test",
+    "references": [
+        "GUID:e59bf9fc7d5a44b18a819a92edd46163",
+        "GUID:f5f01a091e0d746659b4380253d52f4e",
+        "GUID:e06a58708b83247ca9dc984644f5b40b",
+        "GUID:03de0458dc3246a46b826ed1491388cf",
+        "GUID:b9092ff01b63603448ee76c49f7046eb"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
