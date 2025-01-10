@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdb2642b03f65c649bbec6bbd7e535ad, type: 3}
+  m_Name: Map Module
+  m_EditorClassIdentifier: 
+  mapNames:
+  - Oron
+  provinceGOPrefab: {fileID: 5274550238540852245, guid: bb1c207c759f2d641af6eac2d6586f31,
+    type: 3}
+  provinceHighlightGOPrefab: {fileID: 6492647641375642767, guid: d4780a189111938468551d5985ec2e89,
+    type: 3}
