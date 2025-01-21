@@ -20,5 +20,20 @@ namespace MF.Map
         public readonly string selfName;
 
         public EcsPackedEntity[] provincePEs;
+
+        public EcsPackedEntity GetProvince(
+            int provinceIndex)
+        {
+            return provincePEs[provinceIndex];
+        }
+
+        /// <summary>
+        /// Ќельз€ использовать в многопоточных системах
+        /// </summary>
+        /// <returns></returns>
+        public EcsPackedEntity GetProvinceRandom()
+        {
+            return GetProvince(UnityEngine.Random.Range(0, provincePEs.Length));
+        }
     }
 }

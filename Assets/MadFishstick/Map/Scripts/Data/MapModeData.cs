@@ -1,4 +1,6 @@
 
+using System.Collections.Generic;
+
 using UnityEngine;
 
 using Leopotam.EcsLite;
@@ -10,6 +12,36 @@ namespace MF.Map
         internal EcsPackedEntity defaultMapModePE;
 
         public EcsPackedEntity activeMapModePE;
+
+        public static void MapModeCreationRequest(
+            EcsPool<SRMapModeCreation> requestPool,
+            int mapModeEntity, string mapModeName,
+            bool defaultMapMode)
+        {
+            //Назначаем сущности запрос создания режима карты
+            ref SRMapModeCreation requestComp = ref requestPool.Add(mapModeEntity);
+
+            //Заполняем данные запроса
+            requestComp = new(
+                mapModeName,
+                defaultMapMode);
+        }
+
+        public static void MapModeUpdateColorsListRequest(
+            EcsWorld world,
+            EcsPool<RMapModeUpdateColorsList> requestPool,
+            EcsPackedEntity mapModePE,
+            List<Color> mapModeColors)
+        {
+            //Создаём новую сущность и назначаем ей запрос
+            int requestEntity = world.NewEntity();
+            ref RMapModeUpdateColorsList requestComp = ref requestPool.Add(requestEntity);
+
+            //Заполняем данные запроса
+            requestComp = new(
+                mapModePE,
+                mapModeColors);
+        }
 
         internal static void MapModeActivationRequest(
             EcsWorld world,
@@ -36,7 +68,7 @@ namespace MF.Map
             requestComp = new(0);
         }
 
-         static void SetMapRenderValuesRequestFull(
+         public static void SetMapRenderValuesRequestFull(
             EcsPool<SRSetMapRenderValues> requestPool,
             ref CMapModeCore mapMode,
             int targetEntity,

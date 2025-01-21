@@ -39,7 +39,3 @@ MonoBehaviour:
   - {r: 1, g: 0, b: 0, a: 1}
   - {r: 0, g: 1, b: 0, a: 1}
   - {r: 0, g: 0, b: 1, a: 1}
-  provinceHSPrefab: {fileID: 6332756873237223092, guid: bb1c207c759f2d641af6eac2d6586f31,
-    type: 3}
-  provinceHSHighlightPrefab: {fileID: 1561914676020392569, guid: d4780a189111938468551d5985ec2e89,
-    type: 3}

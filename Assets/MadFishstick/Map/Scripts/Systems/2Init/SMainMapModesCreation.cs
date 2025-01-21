@@ -56,8 +56,7 @@ namespace MF.Map
 
             //Заполняем основные данные режима
             mapMode = new(
-                world.Value.PackEntity(mapModeEntity), requestComp.name,
-                requestComp.colors);
+                world.Value.PackEntity(mapModeEntity), requestComp.name);
         }
     }
 }

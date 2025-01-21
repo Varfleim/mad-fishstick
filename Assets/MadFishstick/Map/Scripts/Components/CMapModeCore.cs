@@ -10,13 +10,12 @@ namespace MF.Map
     public struct CMapModeCore
     {
         public CMapModeCore(
-            EcsPackedEntity selfPE, string selfName, 
-            List<Color> colors)
+            EcsPackedEntity selfPE, string selfName)
         {
             this.selfPE = selfPE;
             this.selfName = selfName;
 
-            this.colors = colors;
+            this.colors = new();
         }
 
         public readonly EcsPackedEntity selfPE;

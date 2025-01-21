@@ -28,9 +28,6 @@ namespace HS
                 HexasphereGenerationRequest(
                     mapEntity,
                     ref requestComp);
-
-                //Удаляем запрос
-                mapGenerationSelfRequestPool.Value.Del(mapEntity);
             }
         }
 

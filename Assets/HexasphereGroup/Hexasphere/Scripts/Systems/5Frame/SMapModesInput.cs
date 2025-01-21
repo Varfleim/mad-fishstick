@@ -27,7 +27,7 @@ namespace HS
                 //Берём карту
                 ref CMap activeMap = ref mapPool.Value.Get(activeMapEntity);
 
-                //Проверяем ввод в режимах карты
+                //Обрабатываем ввод в режимах карты
                 MapModesInput();
             }
         }
@@ -46,8 +46,8 @@ namespace HS
             //Для каждого активного стандартного режима карты
             foreach (int activeMapModeEntity in activeDefaultMapModeFilter.Value)
             {
-                //Берём активный режим карты
-                ref CMapModeCore activeMapMode = ref mapModeCorePool.Value.Get(activeMapModeEntity);
+                //Берём режим карты
+                ref CMapModeCore mapMode = ref mapModeCorePool.Value.Get(activeMapModeEntity);
 
                 //Для каждого запроса проверки положения курсора на карте
                 foreach (int requestEntity in mouseMapPositionCheckFilter.Value)
@@ -55,9 +55,9 @@ namespace HS
                     //Берём запрос
                     ref RMouseMapPositionCheck requestComp = ref mouseMapPositionCheckPool.Value.Get(requestEntity);
 
-                    //Проверяем положение курсора
+                    //Обрабатываем положение курсора
                     DefaultMapModeMousePositionCheck(
-                        ref activeMapMode,
+                        ref mapMode,
                         ref requestComp);
                     
                     //Удаляем запрос
@@ -75,6 +75,7 @@ namespace HS
             requestComp.currentProvincePE.Unpack(world.Value, out int provinceEntity);
             ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
 
+            //Берём отображаемый объект провинции
             pR.DisplayedObjectPE.Unpack(world.Value, out provinceEntity);
 
             //Запрашиваем для неё подсветку наведения

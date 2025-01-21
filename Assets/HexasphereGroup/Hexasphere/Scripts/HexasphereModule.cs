@@ -55,14 +55,14 @@ namespace HS
             //Генерация гексасферы по запросу
             startup.AddPreInitSystem(new SHexasphereGeneration());
 
-            //Создание стандартного режима карты
+            //Создание режимов карты
             startup.AddPreInitSystem(new SMapModesCreation());
             #endregion
 
             //Добавляем покадровые системы
             #region Frame
             //Ввод в режимах карты
-            startup.AddPreRenderSystem(new SMapModesInput());
+            startup.AddFrameSystem(new SMapModesInput());
 
             //Преобразование запроса движения камеры
             startup.AddFrameSystem(new SICameraMovingRequest());
