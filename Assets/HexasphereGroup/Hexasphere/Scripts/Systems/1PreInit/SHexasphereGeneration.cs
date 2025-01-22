@@ -268,26 +268,74 @@ namespace HS
                 //Очищаем временный список
                 tempNeighbours.Clear();
 
-                //Для каждого треугольника в данных центра провинции
-                for (int a = 0; a < pHS.centerPoint.triangleCount; a++)
+                //Берём первый треугольник в данных провинции
+                DHexasphereTriangle firstTriangle = pHS.centerPoint.triangles[0];
+
+                //Для каждой вершины треугольника
+                for (int a = 0; a < firstTriangle.points.Length; a++)
                 {
-                    //Берём треугольник
-                    DHexasphereTriangle triangle = pHS.centerPoint.triangles[a];
-
-                    //Для каждой вершины треугольника
-                    for (int b = 0; b < 3; b++)
+                    //Если это не текущая провинция
+                    if (firstTriangle.points[a].provincePE.EqualsTo(pHS.selfPE) == false)
                     {
-                        //Берём PHS вершины
-                        triangle.points[b].provincePE.Unpack(world.Value, out int neighbourProvinceEntity);
-                        ref CProvinceHexasphere neighbourPHS = ref pHSPool.Value.Get(neighbourProvinceEntity);
+                        //Заносим провинцию в список
+                        tempNeighbours.Add(firstTriangle.points[a].provincePE);
+                    }
+                }
 
-                        //Если это не текущая провниция и временный список ещё не содержит её
-                        if (neighbourPHS.selfPE.EqualsTo(in pHS.selfPE) == false && tempNeighbours.Contains(neighbourPHS.selfPE) == false)
+                //Пока количество соседей во временном списке меньше количества треугольников
+                while (tempNeighbours.Count < pHS.centerPoint.triangleCount)
+                {
+                    //Создаём переменную для новой провинции
+                    EcsPackedEntity newProvincePE = new();
+
+                    //Для каждого треугольника провинции
+                    for (int a = 0; a < pHS.centerPoint.triangleCount; a++)
+                    {
+                        //Берём треугольник
+                        DHexasphereTriangle triangle = pHS.centerPoint.triangles[a];
+
+                        //Проверяем, является ли этот треугольник следующим по порядку
+                        bool isContainPreviousProvince = false;
+                        bool isContainNewProvince = false;
+
+                        //Для каждой вершины треугольника
+                        for (int b = 0; b < triangle.points.Length; b++)
                         {
-                            //Заносим PE соседа в список
-                            tempNeighbours.Add(neighbourPHS.selfPE);
+                            //Если это не текущая провинция
+                            if (triangle.points[b].provincePE.EqualsTo(pHS.selfPE) == false)
+                            {
+                                //Берём PE провинции
+                                EcsPackedEntity trianglePointProvincePE = triangle.points[b].provincePE;
+
+                                //Если эта провинция - последняя во временном списке
+                                if (tempNeighbours[tempNeighbours.Count - 1].EqualsTo(trianglePointProvincePE) == true)
+                                {
+                                    //Отмечаем, что треугольник содержит предыдущую провинцию
+                                    isContainPreviousProvince = true;
+                                }
+                                //Иначе, если этой провинции нет во временном списке
+                                else if (tempNeighbours.Contains(trianglePointProvincePE) == false)
+                                {
+                                    //Отмечаем, что треугольник содержит новую провинцию
+                                    isContainNewProvince = true;
+
+                                    //Сохраняем PE новой провинции
+                                    newProvincePE = trianglePointProvincePE;
+                                }
+                            }
+                        }
+
+                        //Если этот треугольник удовлетворяет обоим условиям, то он является следующим
+                        if (isContainPreviousProvince == true
+                            && isContainNewProvince == true)
+                        {
+                            //Выходим из цикла
+                            break;
                         }
                     }
+
+                    //Заносим новую провинцию во временный список
+                    tempNeighbours.Add(newProvincePE);
                 }
 
                 //Запрашиваем создание PC по PHS

@@ -11,18 +11,21 @@ namespace SO.Region
             int a)
         {
             innerProvincePEs = new();
-            outerProvincePEs = new();
+            outerProvinceWithFreeNeighboursPEs = new();
+            outerProvinceWithoutFreeNeighboursPEs = new();
 
             provinceWithoutFreeNeighboursCount = 0;
         }
 
         public List<EcsPackedEntity> innerProvincePEs;
-        public List<EcsPackedEntity> outerProvincePEs;
+        public List<EcsPackedEntity> outerProvinceWithFreeNeighboursPEs;
+        public List<EcsPackedEntity> outerProvinceWithoutFreeNeighboursPEs;
+
         public int ProvinceTotalCount
         {
             get
             {
-                return innerProvincePEs.Count + outerProvincePEs.Count;
+                return innerProvincePEs.Count + outerProvinceWithFreeNeighboursPEs.Count + outerProvinceWithoutFreeNeighboursPEs.Count;
             }
         }
 
@@ -33,7 +36,8 @@ namespace SO.Region
             List<EcsPackedEntity> allProvincePEs = new();
 
             allProvincePEs.AddRange(innerProvincePEs);
-            allProvincePEs.AddRange(outerProvincePEs);
+            allProvincePEs.AddRange(outerProvinceWithFreeNeighboursPEs);
+            allProvincePEs.AddRange(outerProvinceWithoutFreeNeighboursPEs);
 
             return allProvincePEs;
         }

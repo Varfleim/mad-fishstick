@@ -252,22 +252,30 @@ namespace SO.Region
                         ref CTRegionGeneration rG = ref rGPool.Value.Get(regionEntity);
 
                         //Берём из региона случайную провинцию со свободными соседями
-                        int currentProvinceEntity = RegionGetProvinceWithFreeNeighbours(ref rG);
+                        int currentProvinceEntity = RegionGetProvinceWithFreeNeighbours(
+                            ref rC, ref rG);
                         ref CProvinceCore currentPC = ref pCPool.Value.Get(currentProvinceEntity);
                         ref CTProvinceRegionNeighbours currentPRN = ref pRNPool.Value.Get(currentProvinceEntity);
+                        ref CTProvinceRegionOwner currentPRO = ref pROPool.Value.Get(currentProvinceEntity);
 
-                        //Берём из провицнии случайную соседнюю провинцию, не принадлежащую регионам
-                        int neighbourProvinceEntity = ProvinceGetNeighbourWithoutRegion(ref currentPC);
-                        ref CProvinceCore neighbourPC = ref pCPool.Value.Get(neighbourProvinceEntity);
-                        ref CTProvinceRegionNeighbours neighbourPRN = ref pRNPool.Value.Get(neighbourProvinceEntity);
+                        //Пытаемся получить соседа провинции, соответствующего условиям
+                        int neighbourProvinceEntity = ProvinceGetNeighbourWithoutRegion(
+                            ref currentPC, ref currentPRO);
+                        //Если полученная сущность действительна
+                        if(neighbourProvinceEntity > -1)
+                        {
+                            //Берём соседнюю провинции
+                            ref CProvinceCore neighbourPC = ref pCPool.Value.Get(neighbourProvinceEntity);
+                            ref CTProvinceRegionNeighbours neighbourPRN = ref pRNPool.Value.Get(neighbourProvinceEntity);
 
-                        //Присоединяем полученную провинцию к региону
-                        RegionAddProvince(
-                            ref rC, ref rG,
-                            neighbourProvinceEntity, ref neighbourPC, ref neighbourPRN);
+                            //Присоединяем полученную провинцию к региону
+                            RegionAddProvince(
+                                ref rC, ref rG,
+                                neighbourProvinceEntity, ref neighbourPC, ref neighbourPRN);
 
-                        //Увеличиваем количество добавленных провинций
-                        addedProvincesCount++;
+                            //Увеличиваем количество добавленных провинций
+                            addedProvincesCount++;
+                        }
                     }
                 }
 
@@ -290,37 +298,162 @@ namespace SO.Region
         }
 
         int RegionGetProvinceWithFreeNeighbours(
-            ref CTRegionGeneration rG)
+            ref CRegionCore rC, ref CTRegionGeneration rG)
         {
-            //Берём случайную внешнюю провинцию региона
-            rG.outerProvincePEs[Random.Range(0, rG.outerProvincePEs.Count)].Unpack(world.Value, out int provinceEntity);
+            //Создаём переменую для сущности лучшей найденной провинции
+            int bestProvinceEntity = -1;
+            //И счётчик соседних провинций с тем же родительским регионом
+            int globalSameRegionNeighboursCount = -1;
 
-            //Пока полученная внешняя провинция не имеет свободных соседей
-            while (withoutFreeNeighboursPool.Value.Has(provinceEntity) == true)
+            //Проходим по всем внешним провинциям региона, имеющим свободных соседей
+            for(int a = 0; a < rG.outerProvinceWithFreeNeighboursPEs.Count; a++)
             {
-                //Берём случайную внешнюю провинцию региона
-                rG.outerProvincePEs[Random.Range(0, rG.outerProvincePEs.Count)].Unpack(world.Value, out provinceEntity);
+                //Берём провинцию
+                rG.outerProvinceWithFreeNeighboursPEs[a].Unpack(world.Value, out int provinceEntity);
+                ref CProvinceCore pC = ref pCPool.Value.Get(provinceEntity);
+                ref CTProvinceRegionNeighbours pRN = ref pRNPool.Value.Get(provinceEntity);
+
+                //Создаём локальный счётчик соседних провинций с тем же родительским регионом
+                int localSameRegionNeighboursCount = 0;
+
+                //Проходим по её соседям, подсчитывая, сколько из них принадлежат тому же региону
+                for(int b = 0; b < pC.neighbourProvincePEs.Length; b++)
+                {
+                    //Берём сущность соседней провинции
+                    pC.neighbourProvincePEs[b].Unpack(world.Value, out int neighbourProvinceEntity);
+
+                    //Если соседняя провинция имеет владельца
+                    if(pROPool.Value.Has(neighbourProvinceEntity) == true)
+                    {
+                        //Берём компонент владения
+                        ref CTProvinceRegionOwner neighbourPRO = ref pROPool.Value.Get(neighbourProvinceEntity);
+
+                        //Если соседняя провинция принадлежит тому же региону
+                        if(neighbourPRO.parentRegionPE.EqualsTo(rC.selfPE) == true)
+                        {
+                            //Увеличиваем локальный счётчик
+                            localSameRegionNeighboursCount++;
+                        }
+                    }
+                }
+
+                //Если значение локального счётчика выше глобального
+                if(localSameRegionNeighboursCount > globalSameRegionNeighboursCount)
+                {
+                    //Обновляем сущность лучшей провинции
+                    bestProvinceEntity = provinceEntity;
+
+                    //И глобальный счётчик
+                    globalSameRegionNeighboursCount = localSameRegionNeighboursCount;
+                }
+                //Иначе, если локальное значение равно глобальному
+                else if (localSameRegionNeighboursCount == globalSameRegionNeighboursCount)
+                {
+                    //С некоторым шансом
+                    if(Random.value >= 0.5f)
+                    {
+                        //Обновляем сущность лучшей провинции
+                        bestProvinceEntity = provinceEntity;
+                    }
+                }
             }
 
-            //Возвращаем сущность итоговой провинции
-            return provinceEntity;
+            //Возвращаем сущность лучщей провинции
+            return bestProvinceEntity;
         }
 
         int ProvinceGetNeighbourWithoutRegion(
-            ref CProvinceCore pC)
+            ref CProvinceCore pC, ref CTProvinceRegionOwner pRO)
         {
-            //Берём случайную соседнюю провинцию
-            pC.neighbourProvincePEs[Random.Range(0, pC.neighbourProvincePEs.Length)].Unpack(world.Value, out int neighbourProvinceEntity);
+            //Создаём переменную для сущности лучшей найденной провинции
+            int bestProvinceEntity = -1;
+            //И счётчик соседних провинций с тем же родительским регионом
+            int globalSameRegionNeighboursCount = 1;
 
-            //Пока полученная провинция имеет владельца
-            while (pROPool.Value.Has(neighbourProvinceEntity) == true)
+            //Создаём переменную для отслеживания предыдущего соседа и заполняем её последним соседом в массиве
+            pC.neighbourProvincePEs[pC.neighbourProvincePEs.Length - 1].Unpack(world.Value, out int previousNeighbourProvinceEntity);
+
+            //Проходим по всем соседям
+            for (int a = 0; a < pC.neighbourProvincePEs.Length; a++)
             {
-                //Берём случайную соседнюю провинцию
-                pC.neighbourProvincePEs[Random.Range(0, pC.neighbourProvincePEs.Length)].Unpack(world.Value, out neighbourProvinceEntity);
+                //Берём сущность текущего соседа
+                pC.neighbourProvincePEs[a].Unpack(world.Value, out int currentNeighbourProvinceEntity);
+
+                //Если он не имеет владельца
+                if(pROPool.Value.Has(currentNeighbourProvinceEntity) == false)
+                {
+                    //Создаём локальный счётчик соседних провинций с тем же родительским регионом
+                    int localSameRegionNeighboursCount = 0;
+
+                    //Если предыдущий сосед имеет владельца
+                    if (pROPool.Value.Has(previousNeighbourProvinceEntity) == true)
+                    {
+                        //Берём компонент владения предыдущего соседа
+                        ref CTProvinceRegionOwner previousNeighbourPRO = ref pROPool.Value.Get(previousNeighbourProvinceEntity);
+
+                        //Если предыдущий сосед принадлежит тому же региону, увеличиваем счётчик
+                        if (previousNeighbourPRO.parentRegionPE.EqualsTo(pRO.parentRegionPE) == true)
+                        {
+                            localSameRegionNeighboursCount++;
+                        }
+                    }
+
+                    //Берём сущность следующего соседа
+                    int nextNeighbourProvinceEntity = -1;
+
+                    //Если текущий сосед - не последний в массиве
+                    if (a < pC.neighbourProvincePEs.Length - 1)
+                    {
+                        //Следующим соседом является a + 1, берём его сущность
+                        pC.neighbourProvincePEs[a + 1].Unpack(world.Value, out nextNeighbourProvinceEntity);
+                    }
+                    //Иначе 
+                    else
+                    {
+                        //Следующим соседом является первый сосед, берём его сущность
+                        pC.neighbourProvincePEs[0].Unpack(world.Value, out nextNeighbourProvinceEntity);
+                    }
+
+                    //Если следующий сосед имеет владельца
+                    if(pROPool.Value.Has(nextNeighbourProvinceEntity) == true)
+                    {
+                        //Берём компонент владения следующего соседа
+                        ref CTProvinceRegionOwner nextNeighbourPRO = ref pROPool.Value.Get(nextNeighbourProvinceEntity);
+
+                        //Если следующий сосед принадлежит тому же региону, увеличиваем счётчик
+                        if (nextNeighbourPRO.parentRegionPE.EqualsTo(pRO.parentRegionPE) == true)
+                        {
+                            localSameRegionNeighboursCount++;
+                        }
+                    }
+
+                    //Если значение локального счётчика выше глобального
+                    if (localSameRegionNeighboursCount > globalSameRegionNeighboursCount)
+                    {
+                        //Обновляем сущность лучшей провинции
+                        bestProvinceEntity = currentNeighbourProvinceEntity;
+
+                        //И глобальный счётчик
+                        globalSameRegionNeighboursCount = localSameRegionNeighboursCount;
+                    }
+                    //Иначе, если локальное значение равно глобальному
+                    else if (localSameRegionNeighboursCount == globalSameRegionNeighboursCount)
+                    {
+                        //С некоторым шансом
+                        if (Random.value >= 0.5f)
+                        {
+                            //Обновляем сущность лучшей провинции
+                            bestProvinceEntity = currentNeighbourProvinceEntity;
+                        }
+                    }
+                }
+
+                //Сохраняем сущность текущего соседа как предыдущего
+                previousNeighbourProvinceEntity = currentNeighbourProvinceEntity;
             }
 
             //Возвращаем сущность итоговой провинции
-            return neighbourProvinceEntity;
+            return bestProvinceEntity;
         }
 
         void RegionAddProvince(
@@ -328,7 +461,7 @@ namespace SO.Region
             int provinceEntity, ref CProvinceCore pC, ref CTProvinceRegionNeighbours pRN)
         {
             //Заносим провинцию в список внешних провинций региона
-            rG.outerProvincePEs.Add(pRN.selfPE);
+            rG.outerProvinceWithFreeNeighboursPEs.Add(pRN.selfPE);
 
             //Назначаем провинции компонент владельца
             ref CTProvinceRegionOwner pRO = ref pROPool.Value.Add(provinceEntity);
@@ -346,7 +479,10 @@ namespace SO.Region
             //Если у провинции нет свободных соседей
             if (withoutFreeNeighboursPool.Value.Has(provinceEntity) == true)
             {
-                RegionAddProvinceWithoutFreeNeighbours(rC.selfPE);
+                //Увеличиваем количество провинций, не имеющих свободных соседей
+                RegionAddProvinceWithoutFreeNeighbours(
+                    rC.selfPE,
+                    pRN.selfPE);
             }
 
             //Проверяем пограничные провинции региона
@@ -378,13 +514,16 @@ namespace SO.Region
                     ref CTProvinceRegionOwner pRO = ref pROPool.Value.Get(provinceEntity);
 
                     //Увеличиваем количество провинций, не имеющих свободных соседей
-                    RegionAddProvinceWithoutFreeNeighbours(pRO.parentRegionPE);
+                    RegionAddProvinceWithoutFreeNeighbours(
+                        pRO.parentRegionPE,
+                        pRN.selfPE);
                 }
             }
         }
 
         void RegionAddProvinceWithoutFreeNeighbours(
-            EcsPackedEntity regionPE)
+            EcsPackedEntity regionPE,
+            EcsPackedEntity provincePE)
         {
             //Берём регион
             regionPE.Unpack(world.Value, out int regionEntity);
@@ -393,6 +532,16 @@ namespace SO.Region
 
             //Увеличиваем количество провинций, не имеющих свободных соседей
             rG.provinceWithoutFreeNeighboursCount++;
+
+            //Если провинция находится в списке внешних провинций региона со свободными соседями
+            if (rG.outerProvinceWithFreeNeighboursPEs.Contains(provincePE))
+            {
+                //Удаляем её из этого списка
+                rG.outerProvinceWithFreeNeighboursPEs.Remove(provincePE);
+
+                //И заносим в список внешних провинций, не имеющих свободных соседей
+                rG.outerProvinceWithoutFreeNeighboursPEs.Add(provincePE);
+            }
 
             //Если соседи всех провинций уже заняты
             if (rG.provinceWithoutFreeNeighboursCount == rG.ProvinceTotalCount)
@@ -406,10 +555,10 @@ namespace SO.Region
             ref CRegionCore rC, ref CTRegionGeneration rG)
         {
             //Для каждой внешней провинции региона в обратном порядке
-            for (int a = rG.outerProvincePEs.Count - 1; a >= 0; a--)
+            for (int a = rG.outerProvinceWithFreeNeighboursPEs.Count - 1; a >= 0; a--)
             {
                 //Берём сущость провинции
-                rG.outerProvincePEs[a].Unpack(world.Value, out int provinceEntity);
+                rG.outerProvinceWithFreeNeighboursPEs[a].Unpack(world.Value, out int provinceEntity);
 
                 //Если провинция не имеет свободных соседей, то она может оказаться внутренней
                 if (withoutFreeNeighboursPool.Value.Has(provinceEntity) == true)
@@ -444,7 +593,7 @@ namespace SO.Region
                         rG.innerProvincePEs.Add(pC.selfPE);
 
                         //Удаляем провинцию из списка внешних
-                        rG.outerProvincePEs.RemoveAt(a);
+                        rG.outerProvinceWithFreeNeighboursPEs.RemoveAt(a);
                     }
                 }
             }
@@ -463,7 +612,7 @@ namespace SO.Region
             }
 
             //Для каждой провинции с компонентами региона
-            foreach(int provinceEntity in provinceRegionGenerationFilter.Value)
+            foreach (int provinceEntity in provinceRegionGenerationFilter.Value)
             {
                 //Берём провинцию
                 ref CProvinceCore pC = ref pCPool.Value.Get(provinceEntity);
