@@ -8,9 +8,11 @@ namespace MF.Map
     {
         readonly EcsWorldInject world = default;
 
+
         readonly EcsPoolInject<CMap> mapPool = default;
 
         readonly EcsPoolInject<RMapActivation> mapActivationRequestPool = default;
+
 
         readonly EcsCustomInject<MapData> mapData = default;
 
@@ -27,15 +29,14 @@ namespace MF.Map
             {
                 //Создаём карту
                 int mapEntity = MapCreation(
-                    a, mapData.Value.mapNames[a]);
+                    mapData.Value.mapNames[a]);
 
                 //Берём карту
                 ref CMap map = ref mapPool.Value.Get(mapEntity);
 
                 //Запрашиваем генерацию карты
                 MapGenerationRequest(
-                    mapEntity,
-                    map.selfIndex);
+                    mapEntity);
 
                 //Если это первая карта
                 if(a == 0)
@@ -50,7 +51,7 @@ namespace MF.Map
         }
 
         int MapCreation(
-            int mapIndex, string mapName)
+            string mapName)
         {
             //Создаём новую сущность и назначаем ей компонент карты
             int mapEntity = world.Value.NewEntity();
@@ -58,22 +59,20 @@ namespace MF.Map
 
             //Заполняем основные данные карты
             map = new(
-                world.Value.PackEntity(mapEntity), mapIndex, mapName);
+                world.Value.PackEntity(mapEntity), mapName);
 
             return mapEntity;
         }
 
         readonly EcsPoolInject<SRMapGeneration> mapGenerationSelfRequestPool = default;
         void MapGenerationRequest(
-            int mapEntity,
-            int mapIndex)
+            int mapEntity)
         {
             //Назначаем сущности карты самозапрос генерации
             ref SRMapGeneration requestComp = ref mapGenerationSelfRequestPool.Value.Add(mapEntity);
 
             //Заполняем данные запроса
-            requestComp = new(
-                mapIndex);
+            requestComp = new(0);
         }
     }
 }

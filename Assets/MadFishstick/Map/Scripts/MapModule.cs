@@ -57,7 +57,7 @@ namespace MF.Map
 
         public override void InjectData(MFStartup startup)
         {
-            //Создаём компонент данных карты
+            //Создаём компонент данных карт
             MapData mapData = startup.AddDataObject().AddComponent<MapData>();
 
             //Переносим в него данные

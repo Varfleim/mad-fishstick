@@ -45,7 +45,7 @@ namespace MF.Map
                     ref SRProvinceCoreCreation requestComp = ref pCCreationSelfRequestPool.Value.Get(provinceEntity);
 
                     //Если провинция принадлежит текущей карте
-                    if(requestComp.parentMapIndex == map.selfIndex)
+                    if(requestComp.parentMapPE.EqualsTo(map.selfPE))
                     {
                         //Создаём PC по запросу
                         ProvinceCoreCreation(
