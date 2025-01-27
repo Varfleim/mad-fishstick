@@ -21,10 +21,7 @@ namespace SO.Region
             startup.AddPreInitSystem(new SMapModesCreation());
             #endregion
             #region Init
-            //Запрос генерации регионов по запросу генерации карты
-            startup.AddInitSystem(new SRegionsGenerationRequest());
-
-            //Генерация регионов
+            //Генерация регионов по запросу
             startup.AddInitSystem(new SRegionsGeneration());
             #endregion
 

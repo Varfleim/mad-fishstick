@@ -1,17 +1,20 @@
+
+using Leopotam.EcsLite;
+
 namespace HS
 {
     public readonly struct SRHexasphereGeneration
     {
         public SRHexasphereGeneration(
-            int mapIndex,
+            EcsPackedEntity mapPE,
             int subdivisions)
         {
-            this.mapIndex = mapIndex;
+            this.mapPE = mapPE;
 
             this.subdivisions = subdivisions;
         }
 
-        public readonly int mapIndex;
+        public readonly EcsPackedEntity mapPE;
 
         public readonly int subdivisions;
     }

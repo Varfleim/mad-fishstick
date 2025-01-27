@@ -71,10 +71,11 @@ namespace SO.Region
                 RegionsExpansion(
                     ref map);
 
-                //Выравниваем регионы
-
                 //Переносим данные из временных компонентов в основные
                 RegionsSaveTempData();
+
+                //Удаляем запрос
+                regionsGenerationSelfRequestPool.Value.Del(mapEntity);
             }
         }
 

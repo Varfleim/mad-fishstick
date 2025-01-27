@@ -14,22 +14,8 @@ namespace GS.Agent
         readonly EcsFilterInject<Inc<SRAgentCreation>> agentCreationSelfRequestFilter = default;
         readonly EcsPoolInject<SRAgentCreation> agentCreationSelfRequestPool = default;
 
-
-        readonly EcsCustomInject<AgentData> agentData = default;
-
         public void Init(IEcsSystems systems)
         {
-            //Для каждого агента в списке
-            for (int a = 0; a < agentData.Value.agentNames.Length; a++)
-            {
-                //Создаём новую сущность и назначаем ей запрос создания агента
-                int requestEntity = world.Value.NewEntity();
-                ref SRAgentCreation requestComp = ref agentCreationSelfRequestPool.Value.Add(requestEntity);
-
-                //Заполняем данные запроса
-                requestComp = new(agentData.Value.agentNames[a]);
-            }
-
             //Создаём агентов
             AgentsCreation();
         }

@@ -7,8 +7,6 @@ namespace MF.Map
 {
     internal class MapData : MonoBehaviour
     {
-        public string[] mapNames;
-
         public static void MapActivationRequest(
             EcsWorld world,
             EcsPool<RMapActivation> requestPool,

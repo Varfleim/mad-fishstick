@@ -6,15 +6,15 @@ namespace MF.Map
     public readonly struct SRProvinceCoreCreation
     {
         public SRProvinceCoreCreation(
-            int parentMapIndex,
+            EcsPackedEntity parentMapPE,
             EcsPackedEntity[] neighbourProvincePEs)
         {
-            this.parentMapIndex = parentMapIndex;
+            this.parentMapPE = parentMapPE;
 
             this.neighbourProvincePEs = neighbourProvincePEs;
         }
 
-        public readonly int parentMapIndex;
+        public readonly EcsPackedEntity parentMapPE;
 
         public readonly EcsPackedEntity[] neighbourProvincePEs;
     }

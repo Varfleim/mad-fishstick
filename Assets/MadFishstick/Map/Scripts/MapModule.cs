@@ -4,10 +4,8 @@ using UnityEngine;
 namespace MF.Map
 {
     [CreateAssetMenu]
-    public class MapModule : MFModule
+    internal class MapModule : MFModule
     {
-        public string[] mapNames;
-
         public GOProvince provinceGOPrefab;
         public GOProvinceHighlight provinceHighlightGOPrefab;
 
@@ -59,9 +57,6 @@ namespace MF.Map
         {
             //—оздаЄм компонент данных карт
             MapData mapData = startup.AddDataObject().AddComponent<MapData>();
-
-            //ѕереносим в него данные
-            mapData.mapNames = mapNames;
 
             //¬водим данные
             startup.InjectData(mapData);

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Map Module
   m_EditorClassIdentifier: 
   mapNames:
-  - Oron
+  - TestMap
   provinceGOPrefab: {fileID: 5274550238540852245, guid: bb1c207c759f2d641af6eac2d6586f31,
     type: 3}
   provinceHighlightGOPrefab: {fileID: 6492647641375642767, guid: d4780a189111938468551d5985ec2e89,

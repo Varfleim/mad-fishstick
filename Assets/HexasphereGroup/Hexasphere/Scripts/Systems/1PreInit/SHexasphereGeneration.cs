@@ -340,7 +340,7 @@ namespace HS
 
                 //Запрашиваем создание PC по PHS
                 ProvinceCoreCreationRequest(
-                    hexasphereGenerationRequestComp.mapIndex,
+                    hexasphereGenerationRequestComp.mapPE,
                     provinceEntity,
                     tempNeighbours);
             }
@@ -351,7 +351,7 @@ namespace HS
 
         readonly EcsPoolInject<MF.Map.SRProvinceCoreCreation> pCCreationSelfRequestPool = default;
         void ProvinceCoreCreationRequest(
-            int parentMapIndex,
+            EcsPackedEntity parentMapPE,
             int provinceEntity,
             List<EcsPackedEntity> neighbours)
         {
@@ -360,7 +360,7 @@ namespace HS
 
             //Заполняем данные запроса
             requestComp = new(
-                parentMapIndex,
+                parentMapPE,
                 neighbours.ToArray());
         }
     }

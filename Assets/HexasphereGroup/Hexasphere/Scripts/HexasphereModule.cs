@@ -11,7 +11,6 @@ namespace HS
     public class HexasphereModule : MFModule
     {
         #region Hexasphere
-        public int subdivisions;
         public float hexasphereScale;
         public float extrudeMultiplier;
         #endregion
@@ -50,8 +49,6 @@ namespace HS
         {
             //Добавляем системы инициализации
             #region PreInit
-            //Запрос генерации гексасферы по запросу генерации карты
-            startup.AddPreInitSystem(new SHexasphereGenerationRequest());
             //Генерация гексасферы по запросу
             startup.AddPreInitSystem(new SHexasphereGeneration());
 
@@ -96,7 +93,6 @@ namespace HS
 
             //Переносим в него данные
             //Сфера
-            hexasphereData.subdivisions = subdivisions;
             hexasphereData.hexasphereScale = hexasphereScale;
             HexasphereData.ExtrudeMultiplier = extrudeMultiplier;
 

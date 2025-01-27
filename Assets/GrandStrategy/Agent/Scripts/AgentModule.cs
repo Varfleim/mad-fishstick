@@ -6,10 +6,8 @@ using MF;
 namespace GS.Agent
 {
     [CreateAssetMenu]
-    public class AgentModule : MFModule
+    internal class AgentModule : MFModule
     {
-        public string[] agentNames;
-
         public override void AddSystems(MFStartup startup)
         {
             //Добавляем системы инициализации
@@ -23,9 +21,6 @@ namespace GS.Agent
         {
             //Создаём компонент данных агентов
             AgentData agentData = startup.AddDataObject().AddComponent<AgentData>();
-
-            //Переносим в него данные
-            agentData.agentNames = agentNames;
 
             //Вводим данные
             startup.InjectData(agentData);

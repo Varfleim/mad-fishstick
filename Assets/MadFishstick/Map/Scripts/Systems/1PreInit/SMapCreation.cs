@@ -11,10 +11,10 @@ namespace MF.Map
 
         readonly EcsPoolInject<CMap> mapPool = default;
 
+        readonly EcsFilterInject<Inc<SRMapCreation>> mapCreationSelfRequestFilter = default;
+        readonly EcsPoolInject<SRMapCreation> mapCreationSelfRequestPool = default;
+
         readonly EcsPoolInject<RMapActivation> mapActivationRequestPool = default;
-
-
-        readonly EcsCustomInject<MapData> mapData = default;
 
         public void Init(IEcsSystems systems)
         {
@@ -24,22 +24,23 @@ namespace MF.Map
 
         void MapsCreation()
         {
-            //Для каждой карты
-            for(int a = 0; a < mapData.Value.mapNames.Length; a++)
+            //Для каждого запроса создания карты
+            foreach(int mapRequestEntity in mapCreationSelfRequestFilter.Value)
             {
+                //Берём запрос
+                ref SRMapCreation requestComp = ref mapCreationSelfRequestPool.Value.Get(mapRequestEntity);
+
                 //Создаём карту
-                int mapEntity = MapCreation(
-                    mapData.Value.mapNames[a]);
+                MapCreation(
+                    ref requestComp,
+                    mapRequestEntity);
 
                 //Берём карту
-                ref CMap map = ref mapPool.Value.Get(mapEntity);
+                ref CMap map = ref mapPool.Value.Get(mapRequestEntity);
 
-                //Запрашиваем генерацию карты
-                MapGenerationRequest(
-                    mapEntity);
+                UnityEngine.Debug.LogWarning(map.selfName);
 
-                //Если это первая карта
-                if(a == 0)
+                if (true)
                 {
                     //Запрашиваем активацию карты
                     MapData.MapActivationRequest(
@@ -47,32 +48,22 @@ namespace MF.Map
                         mapActivationRequestPool.Value,
                         map.selfPE);
                 }
+
+                //Удаляем запрос
+                mapCreationSelfRequestPool.Value.Del(mapRequestEntity);
             }
         }
 
-        int MapCreation(
-            string mapName)
+        void MapCreation(
+            ref SRMapCreation requestComp,
+            int mapEntity)
         {
-            //Создаём новую сущность и назначаем ей компонент карты
-            int mapEntity = world.Value.NewEntity();
+            //Назначаем переданной сущности компонент карты
             ref CMap map = ref mapPool.Value.Add(mapEntity);
 
             //Заполняем основные данные карты
             map = new(
-                world.Value.PackEntity(mapEntity), mapName);
-
-            return mapEntity;
-        }
-
-        readonly EcsPoolInject<SRMapGeneration> mapGenerationSelfRequestPool = default;
-        void MapGenerationRequest(
-            int mapEntity)
-        {
-            //Назначаем сущности карты самозапрос генерации
-            ref SRMapGeneration requestComp = ref mapGenerationSelfRequestPool.Value.Add(mapEntity);
-
-            //Заполняем данные запроса
-            requestComp = new(0);
+                world.Value.PackEntity(mapEntity), requestComp.mapName);
         }
     }
 }
