@@ -38,8 +38,6 @@ namespace MF.Map
                 //Берём карту
                 ref CMap map = ref mapPool.Value.Get(mapRequestEntity);
 
-                UnityEngine.Debug.LogWarning(map.selfName);
-
                 if (true)
                 {
                     //Запрашиваем активацию карты

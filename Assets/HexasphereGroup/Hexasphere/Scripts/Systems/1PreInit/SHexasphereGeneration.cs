@@ -5,6 +5,7 @@ using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 
 using MF;
+using MF.Map;
 
 namespace HS
 {
@@ -13,8 +14,10 @@ namespace HS
         readonly EcsWorldInject world = default;
 
 
-        readonly EcsFilterInject<Inc<CProvinceHexasphere>, Exc<MF.Map.SRProvinceCoreCreation>> provinceWithoutNeighboursFilter = default;
+        readonly EcsFilterInject<Inc<CProvinceHexasphere>, Exc<SRProvinceCoreCreation>> provinceWithoutPCCreationSelfRequestFilter = default;
         readonly EcsPoolInject<CProvinceHexasphere> pHSPool = default;
+        readonly EcsFilterInject<Inc<SRProvinceCoreCreation>> pCCreationSelfRequestFilter = default;
+        readonly EcsPoolInject<SRProvinceCoreCreation> pCCreationSelfRequestPool = default;
 
 
         readonly EcsCustomInject<HexasphereData> hexasphereData = default;
@@ -35,14 +38,18 @@ namespace HS
                 //Берём запрос
                 ref SRHexasphereGeneration requestComp = ref hexasphereGenerationSelfRequestPool.Value.Get(mapEntity);
 
-                //Инициализируем данные карты
+                //Инициализируем данные гексасферы
                 HexasphereInitialize();
 
                 //Генерируем простую гексасферу
                 HexasphereGenerate(ref requestComp);
 
-                //Запрашиваем создание PC по PHS
-                ProvinceHexasphereCoreCreationSelfRequests(ref requestComp);
+                //Рассчитываем соседей PHS и запрашиваем создание PC
+                ProvinceHexashpereCalculateNeighbours(ref requestComp);
+
+                //Создаём PC по запросу
+                ProvincesCoreCreation(
+                    mapEntity);
 
                 //Удаляем запрос
                 hexasphereGenerationSelfRequestPool.Value.Del(mapEntity);
@@ -174,7 +181,7 @@ namespace HS
             foreach (DHexaspherePoint point in hexasphereData.Value.points.Values)
             {
                 //Создаём для провинций компоненты гексасферы
-                ProvinceCreate(point);
+                ProvinceHexashpereCreation(point);
             }
         }
 
@@ -238,7 +245,7 @@ namespace HS
             }
         }
 
-        void ProvinceCreate(
+        void ProvinceHexashpereCreation(
             DHexaspherePoint centerPoint)
         {
             //Создаём новую сущность и назначаем ей компонент PHS
@@ -251,14 +258,14 @@ namespace HS
                 centerPoint);
         }
 
-        void ProvinceHexasphereCoreCreationSelfRequests(
+        void ProvinceHexashpereCalculateNeighbours(
             ref SRHexasphereGeneration hexasphereGenerationRequestComp)
         {
             //Создаём временный список для соседей
             List<EcsPackedEntity> tempNeighbours = ListPool<EcsPackedEntity>.Get();
 
-            //Для каждой провинции без соседей
-            foreach (int provinceEntity in provinceWithoutNeighboursFilter.Value)
+            //Для каждой провинции без запроса создания PC
+            foreach (int provinceEntity in provinceWithoutPCCreationSelfRequestFilter.Value)
             {
                 //Берём PHS
                 ref CProvinceHexasphere pHS = ref pHSPool.Value.Get(provinceEntity);
@@ -339,9 +346,10 @@ namespace HS
                 }
 
                 //Запрашиваем создание PC по PHS
-                ProvinceCoreCreationRequest(
-                    hexasphereGenerationRequestComp.mapPE,
+                ProvinceData.ProvinceCoreCreationRequest(
+                    pCCreationSelfRequestPool.Value,
                     provinceEntity,
+                    hexasphereGenerationRequestComp.mapPE,
                     tempNeighbours);
             }
 
@@ -349,19 +357,37 @@ namespace HS
             ListPool<EcsPackedEntity>.Add(tempNeighbours);
         }
 
-        readonly EcsPoolInject<MF.Map.SRProvinceCoreCreation> pCCreationSelfRequestPool = default;
-        void ProvinceCoreCreationRequest(
-            EcsPackedEntity parentMapPE,
-            int provinceEntity,
-            List<EcsPackedEntity> neighbours)
+        readonly EcsPoolInject<CMap> mapPool = default;
+        readonly EcsPoolInject<CProvinceCore> pCPool = default;
+        void ProvincesCoreCreation(
+            int mapEntity)
         {
-            //Назначаем сущности провинции запрос создания PC
-            ref MF.Map.SRProvinceCoreCreation requestComp = ref pCCreationSelfRequestPool.Value.Add(provinceEntity);
+            //Создаём временный список провинций
+            List<EcsPackedEntity> tempProvinces = new();
 
-            //Заполняем данные запроса
-            requestComp = new(
-                parentMapPE,
-                neighbours.ToArray());
+            //Берём карту
+            ref CMap map = ref mapPool.Value.Get(mapEntity);
+
+            //Для каждой провинции с запросом создания PC
+            foreach(int provinceEntity in pCCreationSelfRequestFilter.Value)
+            {
+                //Берём запрос
+                ref SRProvinceCoreCreation requestComp = ref pCCreationSelfRequestPool.Value.Get(provinceEntity);
+
+                //Создаём PC по запросу
+                ProvinceData.ProvinceCoreCreation(
+                    world.Value,
+                    ref requestComp,
+                    provinceEntity,
+                    pCPool.Value,
+                    tempProvinces);
+
+                //Удаляем запрос
+                pCCreationSelfRequestPool.Value.Del(provinceEntity);
+            }
+
+            //Сохраняем список как массив провинций карты
+            map.provincePEs = tempProvinces.ToArray();
         }
     }
 }

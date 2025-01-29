@@ -8,7 +8,7 @@ using MF;
 namespace HS
 {
     [CreateAssetMenu]
-    public class HexasphereModule : MFModule
+    internal class HexasphereModule : MFModule
     {
         #region Hexasphere
         public float hexasphereScale;
@@ -43,17 +43,18 @@ namespace HS
         #region MapMode
         public string defaultMapModeName;
         public List<Color> defaultMapModeColors = new();
+        public Color defaultMapModeDefaultColor;
         #endregion
 
         public override void AddSystems(MFStartup startup)
         {
             //Добавляем системы инициализации
             #region PreInit
-            //Генерация гексасферы по запросу
-            startup.AddPreInitSystem(new SHexasphereGeneration());
-
             //Создание режимов карты
             startup.AddPreInitSystem(new SMapModesCreation());
+
+            //Генерация гексасферы по запросу
+            startup.AddPreInitSystem(new SHexasphereGeneration());
             #endregion
 
             //Добавляем покадровые системы
@@ -88,7 +89,7 @@ namespace HS
 
         public override void InjectData(MFStartup startup)
         {
-            //Создаём объект для данных гексасферы и назначаем ему их компонент
+            //Создаём компонент данных гексасферы
             HexasphereData hexasphereData = startup.AddDataObject().AddComponent<HexasphereData>();
 
             //Переносим в него данные
@@ -120,7 +121,7 @@ namespace HS
             //Вводим данные
             startup.InjectData(hexasphereData);
 
-            //Создаём новый объект для данных камеры гексасферы и назначаем ему их компонент
+            //Создаём компонент данных камеры гексасферы
             HexasphereCameraData hexasphereCameraData = startup.AddDataObject().AddComponent<HexasphereCameraData>();
 
             //Переносим в него данные
@@ -143,12 +144,13 @@ namespace HS
             //Вводим данные
             startup.InjectData(hexasphereCameraData);
 
-            //Создаём новый объект для данных режимов карты и назначаем ему их компонент
+            //Создаём компонент данных режимов карты
             MapModeData mapModeData = startup.AddDataObject().AddComponent<MapModeData>();
 
             //Переносим в него данные
             mapModeData.defaultMapModeName = defaultMapModeName;
             mapModeData.defaultMapModeColors = defaultMapModeColors;
+            mapModeData.defaultMapModeDefaultColor = defaultMapModeDefaultColor;
 
             //Вводим данные
             startup.InjectData(mapModeData);

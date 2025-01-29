@@ -8,6 +8,8 @@ namespace GS.Agent
     [CreateAssetMenu]
     internal class AgentModule : MFModule
     {
+        public string agentObjectType;
+
         public override void AddSystems(MFStartup startup)
         {
             //Добавляем системы инициализации
@@ -21,6 +23,9 @@ namespace GS.Agent
         {
             //Создаём компонент данных агентов
             AgentData agentData = startup.AddDataObject().AddComponent<AgentData>();
+
+            //Переносим в него данные
+            AgentData.agentObjectType = agentObjectType;
 
             //Вводим данные
             startup.InjectData(agentData);

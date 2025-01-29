@@ -10,9 +10,26 @@ namespace GS.Agent
         {
             this.selfPE = selfPE;
             this.selfName = selfName;
+
+            colorIndex = -1;
         }
 
         public readonly EcsPackedEntity selfPE;
         public readonly string selfName;
+
+        public int ColorIndex
+        {
+            get
+            {
+                return colorIndex;
+            }
+        }
+        int colorIndex;
+
+        public void SetColorIndex(
+            int value)
+        {
+            colorIndex = value;
+        }
     }
 }

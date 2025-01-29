@@ -44,10 +44,10 @@ namespace SO.Region
         void RegionMapModeInput()
         {
             //Для каждого активного режима карты регионов
-            foreach(int regionEntity in activeRegionMapModeFilter.Value)
+            foreach(int mapModeEntity in activeRegionMapModeFilter.Value)
             {
                 //Берём режим карты
-                ref CMapModeCore mapMode = ref mapModeCorePool.Value.Get(regionEntity);
+                ref CMapModeCore mapMode = ref mapModeCorePool.Value.Get(mapModeEntity);
 
                 //Для каждого запроса проверки положения курсора на карте
                 foreach(int requestEntity in mouseMapPositionCheckFilter.Value)
@@ -71,7 +71,7 @@ namespace SO.Region
             ref CMapModeCore mapMode,
             ref RMouseMapPositionCheck requestComp)
         {
-            //Берём провинции из запроса
+            //Берём провинцию из запроса
             requestComp.currentProvincePE.Unpack(world.Value, out int provinceEntity);
             ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
 

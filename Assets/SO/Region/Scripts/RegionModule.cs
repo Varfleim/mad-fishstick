@@ -1,6 +1,4 @@
 
-using System.Collections.Generic;
-
 using UnityEngine;
 
 using MF;
@@ -8,21 +6,22 @@ using MF;
 namespace SO.Region
 {
     [CreateAssetMenu]
-    public class RegionModule : MFModule
+    internal class RegionModule : MFModule
     {
         #region MapMode
         public string regionMapModeName;
+        public Color regionMapModeDefaultColor;
         #endregion
+
         public override void AddSystems(MFStartup startup)
         {
             //Добавляем системы инициализации
             #region PreInit
             //Создание режимов карты
             startup.AddPreInitSystem(new SMapModesCreation());
-            #endregion
-            #region Init
+
             //Генерация регионов по запросу
-            startup.AddInitSystem(new SRegionsGeneration());
+            startup.AddPreInitSystem(new SRegionsGeneration());
             #endregion
 
             //Добавляем покадровые системы
@@ -49,11 +48,12 @@ namespace SO.Region
 
         public override void InjectData(MFStartup startup)
         {
-            //Создаём новый объект для данных режимов карты и назначаем ему их компонент
+            //Создаём компонент данных режимов карты
             MapModeData mapModeData = startup.AddDataObject().AddComponent<MapModeData>();
 
             //Переносим в него данные
             mapModeData.regionMapModeName = regionMapModeName;
+            mapModeData.regionMapModeDefaultColor = regionMapModeDefaultColor;
 
             //Вводим данные
             startup.InjectData(mapModeData);

@@ -30,11 +30,11 @@ namespace SO.Region
             //Сохраняем PE режима карты регионов
             mapModeData.Value.regionMapModePE = world.Value.PackEntity(mapModeEntity);
 
-            //Запрашиваем назначаение главного компонента режима карты
+            //Запрашиваем назначение главного компонента режима карты
             MF.Map.MapModeData.MapModeCreationRequest(
                 mapModeCreationSelfRequestPool.Value,
                 mapModeEntity, mapModeData.Value.regionMapModeName,
-                true);
+                false);
         }
     }
 }

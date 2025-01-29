@@ -12,6 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 741e8d28e3ff4e142a8c31d2e31cefd6, type: 3}
   m_Name: Agent Module
   m_EditorClassIdentifier: 
-  agentNames:
-  - TestAgent1
-  - TestAgent2
+  agentObjectType: AgentObjectType

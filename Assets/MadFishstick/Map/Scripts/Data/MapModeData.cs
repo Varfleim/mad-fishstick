@@ -27,20 +27,36 @@ namespace MF.Map
                 defaultMapMode);
         }
 
-        public static void MapModeUpdateColorsListRequest(
+        public static void MapModeUpdateColorsListFirstRequest(
             EcsWorld world,
-            EcsPool<RMapModeUpdateColorsList> requestPool,
-            EcsPackedEntity mapModePE,
-            List<Color> mapModeColors)
+            EcsPool<RMapModeUpdateColorsListFirst> requestPool,
+            string coloredObjectType,
+            List<Color> objectColors)
         {
             //Создаём новую сущность и назначаем ей запрос
             int requestEntity = world.NewEntity();
-            ref RMapModeUpdateColorsList requestComp = ref requestPool.Add(requestEntity);
+            ref RMapModeUpdateColorsListFirst requestComp = ref requestPool.Add(requestEntity);
+
+            //Заполняем данные запроса
+            requestComp = new(
+                coloredObjectType,
+                objectColors);
+        }
+
+        public static void MapModeUpdateColorsListSecondRequest(
+            EcsWorld world,
+            EcsPool<RMapModeUpdateColorsListSecond> requestPool,
+            EcsPackedEntity mapModePE,
+            List<Color> mapModeColors, Color defaultColor)
+        {
+            //Создаём новую сущность и назначаем ей запрос
+            int requestEntity = world.NewEntity();
+            ref RMapModeUpdateColorsListSecond requestComp = ref requestPool.Add(requestEntity);
 
             //Заполняем данные запроса
             requestComp = new(
                 mapModePE,
-                mapModeColors);
+                mapModeColors, defaultColor);
         }
 
         internal static void MapModeActivationRequest(
@@ -92,6 +108,9 @@ namespace MF.Map
         {
             //Назначаем сущности запрос
             ref SRSetMapRenderValues requestComp = ref requestPool.Add(targetEntity);
+
+            //Заполняем данные запроса стандартными данными
+            requestComp = new(0);
         }
 
         public static void SetMapRenderValuesRequestUpdate(

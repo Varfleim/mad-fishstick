@@ -18,7 +18,7 @@ namespace MF.Map
             #endregion
             #region Init
             //Создание главных компонентов провинций
-            startup.AddInitSystem(new SProvinceCoreCreation());
+            //startup.AddInitSystem(new SProvinceCoreCreation());
 
             //Создание главных компонентов режимов карты
             startup.AddInitSystem(new SMainMapModesCreation());
@@ -38,12 +38,15 @@ namespace MF.Map
             startup.AddPreRenderSystem(new SMapModeRenderStart());
             #endregion
             #region Render
-            //Выключение группы систем визуализации режимов карты
-            startup.AddRenderSystem(new SMapModeRenderEnd());
+            //Обновление цветов режимов карты
+            startup.AddRenderSystem(new SMapModesUpdateColors());
             #endregion
             #region PostRender
             //Изменение параметров рендера карты
             startup.AddPostRenderSystem(new SMapRender());
+
+            //Выключение группы систем визуализации режима карты
+            startup.AddPostRenderSystem(new SMapModeRenderEnd());
             #endregion
 
             //Добавляем потиковые системы
@@ -66,6 +69,12 @@ namespace MF.Map
 
             //Вводим данные
             startup.InjectData(mapModeData);
+
+            //Создаём компонент данных провинций
+            ProvinceData provinceData = startup.AddDataObject().AddComponent<ProvinceData>();
+
+            //Вводим данные
+            startup.InjectData(provinceData);
 
             GOProvince.provinceGOPrefab = provinceGOPrefab;
             GOProvinceHighlight.provinceHighlightPrefab = provinceHighlightGOPrefab;

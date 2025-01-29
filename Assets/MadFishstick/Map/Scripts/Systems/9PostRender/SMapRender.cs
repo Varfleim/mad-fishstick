@@ -9,7 +9,7 @@ namespace MF.Map
         readonly EcsWorldInject world = default;
 
 
-        readonly EcsFilterInject<Inc<CMapModeCore, CActiveMapMode>> activeMapModeFilter = default;
+        readonly EcsFilterInject<Inc<CMapModeCore, CActiveMapMode, SRMapModeUpdate>> activeMapModeFilter = default;
         readonly EcsPoolInject<CMapModeCore> mapModePool = default;
 
 
@@ -17,7 +17,7 @@ namespace MF.Map
 
         public void Run(IEcsSystems systems)
         {
-            //Для каждого активного режима карты
+            //Для каждого активного режима карты с запросом обновления
             foreach(int activeMapModeEntity in activeMapModeFilter.Value)
             {
                 //Берём режим карты
@@ -38,6 +38,7 @@ namespace MF.Map
         }
 
         readonly EcsFilterInject<Inc<CProvinceRender, SRSetMapRenderValues>> provinceSetMapRenderValuesFilter = default;
+        readonly EcsFilterInject<Inc<CProvinceRender>, Exc<SRSetMapRenderValues>> provinceWithoutSetMapRenderValuesFilter = default;
         readonly EcsPoolInject<CProvinceRender> pRPool = default;
         readonly EcsPoolInject<SRSetMapRenderValues> setMapRenderValuesSelfRequestPool = default;
         void ProvinceSetMapRenderValues(
@@ -48,8 +49,40 @@ namespace MF.Map
             isHeightUpdated = false;
             isColorUpdated = false;
 
+            //Для каждой провинции без запроса изменения визуализации
+            foreach (int provinceEntity in provinceWithoutSetMapRenderValuesFilter.Value)
+            {
+                //Берём провинцию
+                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+
+                //Обновляем отображаемый объект провинции
+                MapModeData.UpdateProvinceDisplayedObject(
+                    ref mapMode,
+                    ref pR,
+                    new());
+
+                //Изменяем параметры визуализации провинции
+                isHeightUpdated = MapModeData.UpdateProvinceHeight(
+                    ref mapMode,
+                    ref pR,
+                    0.0f);
+
+                isColorUpdated = MapModeData.UpdateProvinceColorIndex(
+                    ref mapMode,
+                    ref pR,
+                    -1);
+            }
+
+            //Если нет провинций с изменением запроса визуализации
+            if(provinceSetMapRenderValuesFilter.Value.GetEntitiesCount() == 0)
+            {
+                //Отмечаем, что требуется обновление карты
+                isHeightUpdated = true;
+                isColorUpdated = true;
+            }
+
             //Для каждой провинции с запросом изменения визуализации
-            foreach(int provinceEntity in provinceSetMapRenderValuesFilter.Value)
+            foreach (int provinceEntity in provinceSetMapRenderValuesFilter.Value)
             {
                 //Берём провинцию и запрос
                 ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);

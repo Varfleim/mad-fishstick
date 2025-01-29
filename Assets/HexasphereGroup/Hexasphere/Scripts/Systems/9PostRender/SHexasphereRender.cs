@@ -117,7 +117,7 @@ namespace HS
                     ProvinceHighlightMeshesUpdate();
                 }
 
-                ////Если требуется обновление цветов
+                //Если требуется обновление цветов
                 if (requestComp.isColorUpdated == true)
                 {
                     //Обновляем цвета провинций

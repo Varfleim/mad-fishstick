@@ -12,5 +12,6 @@ namespace HS
         public string defaultMapModeName;
         public EcsPackedEntity defaultMapModePE;
         public List<Color> defaultMapModeColors = new();
+        public Color defaultMapModeDefaultColor;
     }
 }

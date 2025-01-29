@@ -13,5 +13,4 @@ MonoBehaviour:
   m_Name: Region Module
   m_EditorClassIdentifier: 
   regionMapModeName: SORegionMapMode
-  regionMapModeColors:
-  - {r: 0, g: 0, b: 1, a: 1}
+  regionMapModeDefaultColor: {r: 0.56078434, g: 0.7058824, b: 0.5411765, a: 1}

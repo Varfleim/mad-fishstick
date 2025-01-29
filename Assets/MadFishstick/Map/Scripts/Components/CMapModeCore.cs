@@ -15,18 +15,27 @@ namespace MF.Map
             this.selfPE = selfPE;
             this.selfName = selfName;
 
-            this.colors = new();
+            colors = new();
+            defaultColor = new Color();
         }
 
         public readonly EcsPackedEntity selfPE;
         public readonly string selfName;
 
         public readonly List<Color> colors;
+        public Color defaultColor;
 
         public Color GetProvinceColor(
             ref CProvinceRender pR)
         {
-            return colors[pR.ProvinceColorIndex];
+            if(pR.ProvinceColorIndex != -1)
+            {
+                return colors[pR.ProvinceColorIndex];
+            }
+            else
+            {
+                return defaultColor;
+            }
         }
     }
 }

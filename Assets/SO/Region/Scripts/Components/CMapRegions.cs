@@ -11,5 +11,20 @@ namespace SO.Region
         }
 
         public EcsPackedEntity[] regionPEs;
+
+        public EcsPackedEntity GetRegion(
+            int regionIndex)
+        {
+            return regionPEs[regionIndex];
+        }
+
+        /// <summary>
+        /// Ќельз€ использовать в многопоточных системах
+        /// </summary>
+        /// <returns></returns>
+        public EcsPackedEntity GetRegionRandom()
+        {
+            return GetRegion(UnityEngine.Random.Range(0, regionPEs.Length));
+        }
     }
 }

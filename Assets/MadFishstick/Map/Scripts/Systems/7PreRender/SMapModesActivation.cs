@@ -23,8 +23,6 @@ namespace MF.Map
             //Активируем режим карты по запросу
             MapModesActivation();
 
-            //Обновляем списки цветов режимов карты
-            MapModesUpdateColorsList();
         }
 
         readonly EcsFilterInject<Inc<RMapModeActivation>> mapModeActivationRequestFilter = default;
@@ -117,45 +115,6 @@ namespace MF.Map
             {
                 //Удаляем запрос
                 mapModeUpdateSelfRequestPool.Value.Del(mapModeEntity);
-            }
-        }
-
-        readonly EcsFilterInject<Inc<RMapModeUpdateColorsList>> mapModeUpdateColorsListRequestFilter = default;
-        readonly EcsPoolInject<RMapModeUpdateColorsList> mapModeUpdateColorsListRequestPool = default;
-        void MapModesUpdateColorsList()
-        {
-            //Для каждого запроса обновления списка цветов режима карты
-            foreach(int requestEntity in mapModeUpdateColorsListRequestFilter.Value)
-            {
-                //Берём запрос
-                ref RMapModeUpdateColorsList requestComp = ref mapModeUpdateColorsListRequestPool.Value.Get(requestEntity);
-
-                //Берём режим карты
-                requestComp.mapModePE.Unpack(world.Value, out int mapModeEntity);
-                ref CMapModeCore mapMode = ref mapModeCorePool.Value.Get(mapModeEntity);
-
-                //Обновляем список цветов
-                MapModeUpdateColorsList(
-                    ref mapMode,
-                    ref requestComp);
-
-                //Удаляем запрос
-                mapModeUpdateColorsListRequestPool.Value.Del(requestEntity);
-            }
-        }
-
-        void MapModeUpdateColorsList(
-            ref CMapModeCore mapMode,
-            ref RMapModeUpdateColorsList requestComp)
-        {
-            //Очищаем список цветов режима карты
-            mapMode.colors.Clear();
-
-            //Для каждого цвета в запросе
-            for(int a = 0; a < requestComp.mapModeColors.Count; a++)
-            {
-                //Заносим цвет в список
-                mapMode.colors.Add(requestComp.mapModeColors[a]);
             }
         }
     }

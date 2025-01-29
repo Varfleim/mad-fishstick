@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 924b7f0ce260c4e4da44e77f7692ed40, type: 3}
   m_Name: Hexasphere Module
   m_EditorClassIdentifier: 
-  subdivisions: 50
   hexasphereScale: 100
   extrudeMultiplier: 0.05
   gradientIntensity: 0.25
@@ -39,3 +38,4 @@ MonoBehaviour:
   - {r: 1, g: 0, b: 0, a: 1}
   - {r: 0, g: 1, b: 0, a: 1}
   - {r: 0, g: 0, b: 1, a: 1}
+  defaultMapModeDefaultColor: {r: 0.56078434, g: 0.7058824, b: 0.5411765, a: 1}
