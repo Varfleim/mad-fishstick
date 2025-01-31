@@ -9,7 +9,7 @@ using SO.LandOwnership;
 namespace SO.MapMode
 {
     public struct TPoliticalMapModeRender : IEcsThread<
-        CAgent, CAgentLandOwner, SRSetMapRenderValues,
+        CAgent, CAgentLandOwner, SRUpdateProvinceRender,
         CMapModeCore>
     {
         public EcsWorld world;
@@ -24,8 +24,8 @@ namespace SO.MapMode
         CAgentLandOwner[] aLandOwnerPool;
         int[] aLandOwnerIndices;
 
-        SRSetMapRenderValues[] setMapRenderValuesRequestPool;
-        int[] setMapRenderValuesRequestIndices;
+        SRUpdateProvinceRender[] updateProvinceRenderSRPool;
+        int[] updateProvinceRenderSRIndices;
 
         CMapModeCore[] mapModePool;
         int[] mapModeIndices;
@@ -34,7 +34,7 @@ namespace SO.MapMode
             int[] entities,
             CAgent[] pool1, int[] indices1,
             CAgentLandOwner[] pool2, int[] indices2,
-            SRSetMapRenderValues[] pool3, int[] indices3,
+            SRUpdateProvinceRender[] pool3, int[] indices3,
             CMapModeCore[] pool4, int[] indices4)
         {
             agentEntities = entities;
@@ -45,8 +45,8 @@ namespace SO.MapMode
             aLandOwnerPool = pool2;
             aLandOwnerIndices = indices2;
 
-            setMapRenderValuesRequestPool = pool3;
-            setMapRenderValuesRequestIndices = indices3;
+            updateProvinceRenderSRPool = pool3;
+            updateProvinceRenderSRIndices = indices3;
 
             mapModePool = pool4;
             mapModeIndices = indices4;
@@ -60,14 +60,14 @@ namespace SO.MapMode
 
             for (int a = fromIndex; a < beforeIndex; a++)
             {
-                //Берём владельца земли и запрос изменения визуализации
+                //Берём владельца земли и запрос обновления визуализации провинций
                 int agentEntity = agentEntities[a];
                 ref CAgent agent = ref agentPool[agentIndices[agentEntity]];
                 ref CAgentLandOwner aLandOwner = ref aLandOwnerPool[aLandOwnerIndices[agentEntity]];
-                ref SRSetMapRenderValues requestComp = ref setMapRenderValuesRequestPool[setMapRenderValuesRequestIndices[agentEntity]];
+                ref SRUpdateProvinceRender requestComp = ref updateProvinceRenderSRPool[updateProvinceRenderSRIndices[agentEntity]];
 
-                //Изменяем запрос изменения визуализации, задавая ему цвет агента
-                MF.Map.MapModeData.SetMapRenderValuesRequestUpdate(
+                //Изменяем запрос, задавая ему цвет агента
+                MF.Map.MapModeData.UpdateProvinceRenderRequestUpdate(
                     ref mapModeCore,
                     ref requestComp,
                     aLandOwner.selfPE,

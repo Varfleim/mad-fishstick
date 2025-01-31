@@ -16,7 +16,7 @@
 
 
         SubShader{
-            Tags { "Queue" = "Geometry-2" "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
+            Tags { "Queue" = "Geometry-5" "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
             Blend[_SrcBlend][_DstBlend]
             ZWrite[_ZWrite]
             Pass {

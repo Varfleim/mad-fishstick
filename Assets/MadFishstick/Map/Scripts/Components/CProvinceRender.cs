@@ -12,6 +12,9 @@ namespace MF.Map
         {
             displayedObjectPE = new();
 
+            thinEdgesIndex = -1;
+            thickEdgesIndex = -1;
+
             provinceHeight = 0f;
 
             provinceColorIndex = -1;
@@ -27,6 +30,24 @@ namespace MF.Map
             }
         }
         EcsPackedEntity displayedObjectPE;
+
+        public int ThinEdgesIndex
+        {
+            get
+            {
+                return thinEdgesIndex;
+            }
+        }
+        int thinEdgesIndex;
+        
+        public int ThickEdgesIndex
+        {
+            get
+            {
+                return thickEdgesIndex;
+            }
+        }
+        int thickEdgesIndex;
 
         public float ProvinceHeight
         {
@@ -55,25 +76,37 @@ namespace MF.Map
         }
         GOProvince provinceGO;
 
-        public void SetProvinceDisplayedObject(
+        internal void SetDisplayedObject(
             EcsPackedEntity displayedObjectPE)
         {
             this.displayedObjectPE = displayedObjectPE;
         }
 
-        public void SetProvinceHeight(
+        internal void SetThinEdgesIndex(
+            int thinEdgesIndex)
+        {
+            this.thinEdgesIndex = thinEdgesIndex;
+        }
+        
+        internal void SetThickEdgesIndex(
+            int thickEdgesIndex)
+        {
+            this.thickEdgesIndex = thickEdgesIndex;
+        }
+
+        internal void SetHeight(
             float provinceHeight)
         {
             this.provinceHeight = provinceHeight;
         }
 
-        public void SetProvinceColorIndex(
+        internal void SetColorIndex(
             int provinceColorIndex)
         {
             this.provinceColorIndex = provinceColorIndex;
         }
 
-        public void SetProvinceGO(
+        internal void SetGO(
             GOProvince provinceGO)
         {
             this.provinceGO = provinceGO;

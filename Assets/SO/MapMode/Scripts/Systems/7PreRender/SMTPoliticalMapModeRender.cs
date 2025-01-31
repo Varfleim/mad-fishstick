@@ -10,7 +10,7 @@ using SO.LandOwnership;
 namespace SO.MapMode
 {
     public class SMTPoliticalMapModeRender : EcsThreadSystem<TPoliticalMapModeRender,
-        CAgent, CAgentLandOwner, SRSetMapRenderValues,
+        CAgent, CAgentLandOwner, SRUpdateProvinceRender,
         CMapModeCore>
     {
         readonly EcsWorldInject world = default;
@@ -29,7 +29,7 @@ namespace SO.MapMode
 
         protected override EcsFilter GetFilter(EcsWorld world)
         {
-            return world.Filter<CAgent>().Inc<CAgentLandOwner>().Inc<SRSetMapRenderValues>().End();
+            return world.Filter<CAgent>().Inc<CAgentLandOwner>().Inc<SRUpdateProvinceRender>().End();
         }
 
         protected override void SetData(IEcsSystems systems, ref TPoliticalMapModeRender thread)

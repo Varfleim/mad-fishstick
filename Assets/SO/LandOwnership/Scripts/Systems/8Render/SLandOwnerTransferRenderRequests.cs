@@ -24,25 +24,25 @@ namespace SO.LandOwnership
                 //Берём режим карты
                 ref CMapModeCore mapMode = ref mapModePool.Value.Get(mapModeEntity);
 
-                //Передаём запросы изменения визуализации с владельцев земли
-                LandOwnerTransferSetMapRenderValuesRequests(ref mapMode);
+                //Передаём запросы обновления визуализации провинций с владельцев земли
+                LandOwnerTransferUpdateProvinceRenderRequests(ref mapMode);
 
                 //Передаём запросы подсветки наведения с владельцев земли
                 LandOwnerTransferHoverHighlightRequests(ref mapMode);
             }
         }
 
-        readonly EcsFilterInject<Inc<CAgentLandOwner, SRSetMapRenderValues>> aLandOwnerSetMapRenderValuesSelfRequestFilter = default;
-        readonly EcsPoolInject<SRSetMapRenderValues> setMapRenderValuesSelfRequestPool = default;
-        void LandOwnerTransferSetMapRenderValuesRequests(
+        readonly EcsFilterInject<Inc<CAgentLandOwner, SRUpdateProvinceRender>> aLandOwnerUpdateProvinceRenderSRFilter = default;
+        readonly EcsPoolInject<SRUpdateProvinceRender> updateProvinceRenderSRPool = default;
+        void LandOwnerTransferUpdateProvinceRenderRequests(
             ref CMapModeCore mapMode)
         {
-            //Для каждого владельца земли с запросом изменения визуализации 
-            foreach (int landOwnerEntity in aLandOwnerSetMapRenderValuesSelfRequestFilter.Value)
+            //Для каждого владельца земли с запросом обновления визуализации провинций
+            foreach (int landOwnerEntity in aLandOwnerUpdateProvinceRenderSRFilter.Value)
             {
                 //Берём владельца земли и запрос
                 ref CAgentLandOwner aLandOwner = ref aLandOwnerPool.Value.Get(landOwnerEntity);
-                ref SRSetMapRenderValues requestComp = ref setMapRenderValuesSelfRequestPool.Value.Get(landOwnerEntity);
+                ref SRUpdateProvinceRender requestComp = ref updateProvinceRenderSRPool.Value.Get(landOwnerEntity);
 
                 //Для каждой владеемой земли
                 foreach(EcsPackedEntity landPE in aLandOwner.ownedLandPEs)
@@ -51,8 +51,8 @@ namespace SO.LandOwnership
                     landPE.Unpack(world.Value, out int landEntity);
 
                     //Создаём запрос изменения визуализации для неё
-                    MF.Map.MapModeData.SetMapRenderValuesRequestFull(
-                        setMapRenderValuesSelfRequestPool.Value,
+                    MF.Map.MapModeData.UpdateProvinceRenderRequestFull(
+                        updateProvinceRenderSRPool.Value,
                         ref mapMode,
                         landEntity,
                         requestComp.displayedObjectPE,
@@ -61,17 +61,17 @@ namespace SO.LandOwnership
                 }
 
                 //Удаляем запрос изменения визуализации с владельца земли
-                setMapRenderValuesSelfRequestPool.Value.Del(landOwnerEntity);
+                updateProvinceRenderSRPool.Value.Del(landOwnerEntity);
             }
         }
 
-        readonly EcsFilterInject<Inc<CAgentLandOwner, SRShowMapHoverHighlight>> aLandOwnerHoverHighlightSelfRequestFilter = default;
-        readonly EcsPoolInject<SRShowMapHoverHighlight> showMapHoverHighlightSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<CAgentLandOwner, SRShowMapHoverHighlight>> aLandOwnerHoverHighlightSRFilter = default;
+        readonly EcsPoolInject<SRShowMapHoverHighlight> showMapHoverHighlightSRPool = default;
         void LandOwnerTransferHoverHighlightRequests(
             ref CMapModeCore mapMode)
         {
             //Для каждого владельца земли с запросом подсветки наведения
-            foreach (int landOwnerEntity in aLandOwnerHoverHighlightSelfRequestFilter.Value)
+            foreach (int landOwnerEntity in aLandOwnerHoverHighlightSRFilter.Value)
             {
                 //Берём владельца земли
                 ref CAgentLandOwner aLandOwner = ref aLandOwnerPool.Value.Get(landOwnerEntity);
@@ -84,13 +84,13 @@ namespace SO.LandOwnership
 
                     //Создаём запрос подсветки наведения для неё
                     MF.Map.MapModeData.ShowMapHoverHighlightRequest(
-                        showMapHoverHighlightSelfRequestPool.Value,
+                        showMapHoverHighlightSRPool.Value,
                         ref mapMode,
                         landEntity);
                 }
 
                 //Удаляем запрос подсветки наведения с владельца земли
-                showMapHoverHighlightSelfRequestPool.Value.Del(landOwnerEntity);
+                showMapHoverHighlightSRPool.Value.Del(landOwnerEntity);
             }
         }
     }

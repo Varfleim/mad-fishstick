@@ -12,7 +12,10 @@ namespace HS
 {
     public class SHexasphereRender : IEcsRunSystem
     {
+        readonly EcsWorldInject world = default;
+
         readonly EcsFilterInject<Inc<CProvinceRender, CProvinceHexasphere>> pRFilter = default;
+        readonly EcsPoolInject<CProvinceCore> pCPool = default;
         readonly EcsPoolInject<CProvinceRender> pRPool = default;
         readonly EcsPoolInject<CProvinceHexasphere> pHSPool = default;
 
@@ -27,8 +30,11 @@ namespace HS
             //Инициализация карты
             MapInitialization();
 
-            //Обновление карты
-            MapUpdate();
+            //Обновление граней
+            MapEdgesUpdate();
+
+            //Обновление провинций
+            MapProvincesUpdate();
 
             //Обновление материалов подсветки
             HighlightMaterialUpdate();
@@ -40,15 +46,15 @@ namespace HS
             ProvinceGOEmptyCheck();
         }
 
-        readonly EcsFilterInject<Inc<RMapRenderInitialization>> mapRenderInitializationRequestFilter = default;
-        readonly EcsPoolInject<RMapRenderInitialization> mapRenderInitializationRequestPool = default;
+        readonly EcsFilterInject<Inc<RMapRenderInitialization>> mapRenderInitializationRFilter = default;
+        readonly EcsPoolInject<RMapRenderInitialization> mapRenderInitializationRPool = default;
         void MapInitialization()
         {
             //Для каждого запроса инициализации карты
-            foreach(int requestEntity in mapRenderInitializationRequestFilter.Value)
+            foreach(int requestEntity in mapRenderInitializationRFilter.Value)
             {
                 //Берём запрос
-                ref RMapRenderInitialization requestComp = ref mapRenderInitializationRequestPool.Value.Get(requestEntity);
+                ref RMapRenderInitialization requestComp = ref mapRenderInitializationRPool.Value.Get(requestEntity);
 
                 //Находим сущность активног7о режима карты
                 int activeMapModeEntity = -1;
@@ -66,26 +72,55 @@ namespace HS
                 //Инициализируем гексасферу
                 HexasphereInitialization();
 
-                //Создаём сетку гексасферы
-                HexasphereFrameCreation();
+                //Создаём провинции гексасферы
+                HexasphereProvincesCreation();
 
                 //Обновляем материалы
                 MaterialsUpdate();
 
                 //Удаляем запрос
-                mapRenderInitializationRequestPool.Value.Del(requestEntity);
+                mapRenderInitializationRPool.Value.Del(requestEntity);
             }
         }
 
-        readonly EcsFilterInject<Inc<RMapRenderUpdate>> mapRenderUpdateRequestFilter = default;
-        readonly EcsPoolInject<RMapRenderUpdate> mapRenderUpdateRequestPool = default;
-        void MapUpdate()
+        readonly EcsFilterInject<Inc<RMapEdgesUpdate>> mapEdgesUpdateRFilter = default;
+        readonly EcsPoolInject<RMapEdgesUpdate> mapEdgesUpdateRPool = default;
+        void MapEdgesUpdate()
         {
-            //Для каждого запроса обновления карты
-            foreach(int requestEntity in mapRenderUpdateRequestFilter.Value)
+            //Для каждого запроса обновления граней
+            foreach(int requestEntity in mapEdgesUpdateRFilter.Value)
             {
                 //Берём запрос
-                ref RMapRenderUpdate requestComp = ref mapRenderUpdateRequestPool.Value.Get(requestEntity);
+                ref RMapEdgesUpdate requestComp = ref mapEdgesUpdateRPool.Value.Get(requestEntity);
+
+                //Если требуется обновление тонких граней
+                if(requestComp.isThinUpdated == true)
+                {
+                    //Обновляем тонкие грани
+                    EdgesThinUpdate();
+                }
+
+                //Если требуется обновление толстых граней
+                if(requestComp.isThickUpdated == true)
+                {
+                    //Обновляем толстые грани
+                    EdgesThickUpdate();
+                }
+
+                //Удаляем запрос
+                mapEdgesUpdateRPool.Value.Del(requestEntity);
+            }
+        }
+
+        readonly EcsFilterInject<Inc<RMapProvincesUpdate>> mapProvincesUpdateRFilter = default;
+        readonly EcsPoolInject<RMapProvincesUpdate> mapProvincesUpdateRPool = default;
+        void MapProvincesUpdate()
+        {
+            //Для каждого запроса обновления провинций
+            foreach(int requestEntity in mapProvincesUpdateRFilter.Value)
+            {
+                //Берём запрос
+                ref RMapProvincesUpdate requestComp = ref mapProvincesUpdateRPool.Value.Get(requestEntity);
 
                 //Находим сущность активного режима карты
                 int activeMapModeEntity = -1;
@@ -100,7 +135,7 @@ namespace HS
                 //Берём активный режим карты
                 ref CMapModeCore activeMapMode = ref mapModeCorePool.Value.Get(activeMapModeEntity);
 
-                ////Если требуется обновление материалов
+                //Если требуется обновление материалов
                 if (requestComp.isMaterialUpdated == true)
                 {
                     //Обновляем материалы
@@ -125,30 +160,8 @@ namespace HS
                 }
 
                 //Удаляем запрос
-                mapRenderUpdateRequestPool.Value.Del(requestEntity);
+                mapProvincesUpdateRPool.Value.Del(requestEntity);
             } 
-        }
-
-        void MaterialsUpdate()
-        {
-            //Обновляем тени
-            MeshRenderersShadowSupportUpdate();
-
-            //Обновляем материал провинций
-            hexasphereData.Value.provinceMaterial.SetFloat("_GradientIntensity", 1f - hexasphereData.Value.gradientIntensity);
-            hexasphereData.Value.provinceMaterial.SetFloat("_ExtrusionMultiplier", HexasphereData.ExtrudeMultiplier);
-            hexasphereData.Value.provinceMaterial.SetColor("_Color", hexasphereData.Value.tileTintColor);
-            hexasphereData.Value.provinceMaterial.SetColor("_AmbientColor", hexasphereData.Value.ambientColor);
-            hexasphereData.Value.provinceMaterial.SetFloat("_MinimumLight", hexasphereData.Value.minimumLight);
-
-            //Обновляем размер коллайдера
-            HexasphereData.HexasphereCollider.radius = 0.5f * (1.0f + HexasphereData.ExtrudeMultiplier);
-
-            //Обновляем свет
-            MapUpdateLightingMode();
-
-            //Обновляем скос
-            MapUpdateBevel();
         }
 
         void HexasphereInitialization()
@@ -164,7 +177,7 @@ namespace HS
             {
                 Object.DestroyImmediate(HexasphereData.provincesRootGO);
             }
-
+                 
             //Инициализируем чанки
             ChunksInitialization();
         }
@@ -334,6 +347,7 @@ namespace HS
             hexasphereData.Value.chunksVertices = chunksVerticesList.ToArray();
             hexasphereData.Value.chunksIndices = chunksIndicesList.ToArray();
             hexasphereData.Value.chunksUV2 = chunksUV2List.ToArray();
+
             hexasphereData.Value.chunksUV = chunksUVList.ToArray();
             hexasphereData.Value.chunksColors = chunksColorsList.ToArray();
 
@@ -343,12 +357,6 @@ namespace HS
                 HexasphereData.HexasphereGO.transform,
                 HexasphereData.chunksRootGOName);
             HexasphereData.chunksRootGO = chunksRootGO;
-
-            //Создаём родительский GO для провинций и сохраняем его
-            GameObject provincesRootGO = MapCreateGOAndParent(
-                HexasphereData.HexasphereGO.transform,
-                HexasphereData.provincesRootGOName);
-            HexasphereData.provincesRootGO = provincesRootGO;
 
             //Создаём списки мешфильтров, мешей и мешрендереров
             List<MeshFilter> chunkMeshFilters = new();
@@ -381,10 +389,27 @@ namespace HS
             hexasphereData.Value.chunkMeshFilters = chunkMeshFilters.ToArray();
             hexasphereData.Value.chunkMeshes = chunkMeshes.ToArray();
             hexasphereData.Value.chunkMeshRenderers = chunkMeshRenderers.ToArray();
+
+            //Создаём массивы списков для граней
+            hexasphereData.Value.thinEdgesChunkVertices = new List<Vector3>[chunkIndex + 1];
+            hexasphereData.Value.thinEdgesChunkIndices = new List<int>[chunkIndex + 1];
+            hexasphereData.Value.thinEdgesChunkUVs = new List<Vector2>[chunkIndex + 1];
+            hexasphereData.Value.thinEdgesChunkColors = new List<Color32>[chunkIndex + 1];
+
+            hexasphereData.Value.thickEdgesChunkVertices = new List<Vector3>[chunkIndex + 1];
+            hexasphereData.Value.thickEdgesChunkIndices = new List<int>[chunkIndex + 1];
+            hexasphereData.Value.thickEdgesChunkUVs = new List<Vector2>[chunkIndex + 1];
+            hexasphereData.Value.thickEdgesChunkColors = new List<Color32>[chunkIndex + 1];
+
+            //Создаём родительский GO для провинций и сохраняем его
+            GameObject provincesRootGO = MapCreateGOAndParent(
+                HexasphereData.HexasphereGO.transform,
+                HexasphereData.provincesRootGOName);
+            HexasphereData.provincesRootGO = provincesRootGO;
             #endregion
         }
 
-        void HexasphereFrameCreation()
+        void HexasphereProvincesCreation()
         {
             //Для каждой провинции
             foreach(int provinceEntity in pRFilter.Value)
@@ -489,6 +514,519 @@ namespace HS
             }
         }
 
+        void MaterialsUpdate()
+        {
+            //Обновляем тени
+            MeshRenderersShadowSupportUpdate();
+
+            //Обновляем материал провинций
+            hexasphereData.Value.provinceMaterial.SetFloat("_GradientIntensity", 1f - hexasphereData.Value.gradientIntensity);
+            hexasphereData.Value.provinceMaterial.SetFloat("_ExtrusionMultiplier", HexasphereData.ExtrudeMultiplier);
+            hexasphereData.Value.provinceMaterial.SetColor("_Color", hexasphereData.Value.tileTintColor);
+            hexasphereData.Value.provinceMaterial.SetColor("_AmbientColor", hexasphereData.Value.ambientColor);
+            hexasphereData.Value.provinceMaterial.SetFloat("_MinimumLight", hexasphereData.Value.minimumLight);
+
+            //Обновляем материалы граней
+            hexasphereData.Value.thinEdgesMaterial.SetFloat("_GradientIntensity", 1f - hexasphereData.Value.gradientIntensity);
+            hexasphereData.Value.thinEdgesMaterial.SetFloat("_ExtrusionMultiplier", HexasphereData.ExtrudeMultiplier);
+            Color thinEdgesColor = hexasphereData.Value.thinEdgesColor;
+            thinEdgesColor.r *= hexasphereData.Value.thinEdgesColorIntensity;
+            thinEdgesColor.g *= hexasphereData.Value.thinEdgesColorIntensity;
+            thinEdgesColor.b *= hexasphereData.Value.thinEdgesColorIntensity;
+            hexasphereData.Value.thinEdgesMaterial.SetColor("_Color", thinEdgesColor);
+
+            hexasphereData.Value.thickEdgesMaterial.SetFloat("_GradientIntensity", 1f - hexasphereData.Value.gradientIntensity);
+            hexasphereData.Value.thickEdgesMaterial.SetFloat("_ExtrusionMultiplier", HexasphereData.ExtrudeMultiplier);
+            Color thickEdgesColor = hexasphereData.Value.thickEdgesColor;
+            thickEdgesColor.r *= hexasphereData.Value.thickEdgesColorIntensity;
+            thickEdgesColor.g *= hexasphereData.Value.thickEdgesColorIntensity;
+            thickEdgesColor.b *= hexasphereData.Value.thickEdgesColorIntensity;
+            hexasphereData.Value.thickEdgesMaterial.SetColor("_Color", thickEdgesColor);
+
+            //Обновляем размер коллайдера
+            HexasphereData.HexasphereCollider.radius = 0.5f * (1.0f + HexasphereData.ExtrudeMultiplier);
+
+            //Обновляем свет
+            MapUpdateLightingMode();
+
+            //Обновляем скос
+            MapUpdateBevel();
+        }
+
+        void EdgesThinUpdate()
+        {
+            //Проверяем, какие грани требуется отобразить
+            //Для каждой провинции
+            foreach(int provinceEntity in pRFilter.Value)
+            {
+                //Берём провинцию
+                ref CProvinceCore pC = ref pCPool.Value.Get(provinceEntity);
+                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+                ref CProvinceHexasphere pHS = ref pHSPool.Value.Get(provinceEntity);
+
+                //Обновляем маску граней
+                pHS.thinEdges = 63;
+
+                //Для каждой вершины
+                for (int a = 0; a < pHS.vertices.Length; a++)
+                {
+                    //Берём текущую вершину и следующую
+                    Vector3 p0 = pHS.vertices[a];
+                    Vector3 p1 = a < pHS.vertices.Length - 1 ? pHS.vertices[a + 1] : pHS.vertices[0];
+
+                    //Для каждого соседа
+                    for(int b = 0; b < pC.neighbourProvincePEs.Length; b++)
+                    {
+                        //Берём соседа
+                        pC.neighbourProvincePEs[b].Unpack(world.Value, out int neighbourProvinceEntity);
+                        ref CProvinceCore neighbourPC = ref pCPool.Value.Get(neighbourProvinceEntity);
+                        ref CProvinceRender neighbourPR = ref pRPool.Value.Get(neighbourProvinceEntity);
+                        ref CProvinceHexasphere neighbourPHS = ref pHSPool.Value.Get(neighbourProvinceEntity);
+
+                        //Если индексы граней совпадают
+                        if(pR.ThinEdgesIndex == neighbourPR.ThinEdgesIndex)
+                        {
+                            //Для каждой вершины соседа
+                            for (int c = 0; c < neighbourPHS.vertices.Length; c++)
+                            {
+                                //Берём текущую вершину и следующую
+                                Vector3 q0 = neighbourPHS.vertices[c];
+                                Vector3 q1 = c < neighbourPHS.vertices.Length - 1 ? neighbourPHS.vertices[c + 1] : neighbourPHS.vertices[0];
+
+                                //Если вершины совпадают
+                                if (p0 == q0 && p1 == q1 || p0 == q1 && p1 == q0)
+                                {
+                                    //Обновляем маску граней
+                                    pHS.thinEdges &= 63 - (1 << a);
+
+                                    //Выходим из цикла вплоть до вершины
+                                    b = 9999;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Строим меши граней
+
+            //Определяем индекс чанка и создаём счётчики провинций и вершин
+            int chunkIndex = 0;
+            int provinceCount = 0;
+            int verticesCount = 0;
+
+            //Обновляем списки граней
+            List<Vector3> chunkVertices = HexasphereData.CheckList<Vector3>(ref hexasphereData.Value.thinEdgesChunkVertices[chunkIndex]);
+            List<int> chunkIndices = HexasphereData.CheckList<int>(ref hexasphereData.Value.thinEdgesChunkIndices[chunkIndex]);
+            List<Vector2> chunkUVs = HexasphereData.CheckList<Vector2>(ref hexasphereData.Value.thinEdgesChunkUVs[chunkIndex]);
+            List<Color32> chunkColors = HexasphereData.CheckList<Color32>(ref hexasphereData.Value.thinEdgesChunkColors[chunkIndex]);
+
+            //Для каждой провинции
+            foreach (int provinceEntity in pRFilter.Value)
+            {
+                //Берём провинцию
+                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+                ref CProvinceHexasphere pHS = ref pHSPool.Value.Get(provinceEntity);
+
+                //Если число вершин больше максимального в списке
+                if(verticesCount > HexasphereData.maxVertexArraySize)
+                {
+                    //Увеличиваем индекс чанка
+                    chunkIndex++;
+
+                    //Берём списки нового чанка
+                    chunkVertices = HexasphereData.CheckList<Vector3>(ref hexasphereData.Value.thinEdgesChunkVertices[chunkIndex]);
+                    chunkIndices = HexasphereData.CheckList<int>(ref hexasphereData.Value.thinEdgesChunkIndices[chunkIndex]);
+                    chunkUVs = HexasphereData.CheckList<Vector2>(ref hexasphereData.Value.thinEdgesChunkUVs[chunkIndex]);
+                    chunkColors = HexasphereData.CheckList<Color32>(ref hexasphereData.Value.thinEdgesChunkColors[chunkIndex]);
+
+                    //Обнуляем счётчик вершин
+                    verticesCount = 0;
+                }
+
+                //Создаём структуру для UV-координат
+                Vector2 uVExtruded = new(provinceCount, pR.ProvinceHeight);
+
+                //Определяем положение данных провинции в чанках
+                pHS.parentThinEdgesChunkIndex = chunkIndex;
+                pHS.parentThinEdgesChunkStart = verticesCount;
+                pHS.parentThinEdgesChunkLength = 0;
+
+                //Определяем цвет провинции
+                Color32 provinceColor = Color.white;
+
+                //Сохраняем последнюю вершину в списке
+                int vertex0 = verticesCount;
+
+                //Создаём переменные для отслеживания
+                bool vertexRequired = false;
+                bool vertex0Missing = true;
+
+                //Для каждой вершины провинции
+                for(int a = 0; a < pHS.vertexPoints.Length; a++)
+                {
+                    //Определяем, видима ли грань
+                    bool segmentVisible = (pHS.thinEdges & (1 << a)) != 0;
+
+                    //Если грань видима или вершина необходима
+                    if (segmentVisible || vertexRequired)
+                    {
+                        //Заносим вершину в списки
+                        chunkVertices.Add(pHS.vertexPoints[a].ProjectedVector3);
+                        chunkUVs.Add(uVExtruded);
+                        chunkColors.Add(provinceColor);
+
+                        //Если вершина необходима
+                        if (vertexRequired == true)
+                        {
+                            //Закрываем предыдущий сегмент
+                            chunkIndices.Add(verticesCount);
+                        }
+
+                        //Если грань видима
+                        if (segmentVisible == true)
+                        {
+                            //Начинаем новый сегмент
+                            chunkIndices.Add(verticesCount);
+
+                            //Если это первая вершина
+                            if(a == 0)
+                            {
+                                //Указываем, что нулевая вершина не отсутствует
+                                vertex0Missing = false;
+                            }
+                        }
+
+                        //Увеличиваем счётчик вершин
+                        verticesCount++;
+
+                        //Увеличиваем длину данных провинции в чанке
+                        pHS.parentThinEdgesChunkLength++;
+                    }
+
+                    //Заменяем необходимость вершины на видимость грани
+                    vertexRequired = segmentVisible;
+                }
+
+                //Если вершина необходима
+                if(vertexRequired == true)
+                {
+                    //Если нулевая вершина отсутствует
+                    if (vertex0Missing == true)
+                    {
+                        //Заносим первую вершину провинции в списки
+                        chunkVertices.Add(pHS.vertexPoints[0].ProjectedVector3);
+                        chunkUVs.Add(uVExtruded);
+                        chunkColors.Add(provinceColor);
+                        chunkIndices.Add(verticesCount);
+
+                        //Увеличиваем счётчик вершин
+                        verticesCount++;
+                    }
+                    //Иначе
+                    else
+                    {
+                        //Заносим сохранённую нулевую вершину в список
+                        chunkIndices.Add(vertex0);
+                    }
+                }
+            }
+
+            //Удаляем родительский объект граней, если он не пуст
+            if (HexasphereData.thinEdgesRootGO != null)
+            {
+                Object.DestroyImmediate(HexasphereData.thinEdgesRootGO);
+            }
+
+            //Создаём родительский GO для граней и сохраняем его
+            GameObject edgesRootGO = MapCreateGOAndParent(
+                HexasphereData.HexasphereGO.transform,
+                HexasphereData.thinEdgesRootGOName);
+            HexasphereData.thinEdgesRootGO = edgesRootGO;
+
+            //Создаём списки мешфильтров, мешей и мешрендереров для граней
+            List<MeshFilter> chunksMeshFilters = new();
+            List<Mesh> chunksMeshes = new();
+            List<MeshRenderer> chunksMeshRenderers = new();
+
+            //Для каждого чанка
+            for (int a = 0; a <= chunkIndex; a++)
+            {
+                //Создаём GO чанка граней
+                GameObject chunkGO = MapCreateGOAndParent(
+                    edgesRootGO.transform,
+                    HexasphereData.thinEdgeChunkGOName);
+
+                //Назначаем чанку компонент мешфильтра и заносим его в список
+                MeshFilter meshFilter = chunkGO.AddComponent<MeshFilter>();
+                chunksMeshFilters.Add(meshFilter);
+
+                //Создаём меш и заносим его в список
+                Mesh mesh = new();
+                chunksMeshes.Add(mesh);
+
+                //Заполняем меш вершинами, UV, цветами и индексами
+                mesh.SetVertices(hexasphereData.Value.thinEdgesChunkVertices[a]);
+                mesh.SetUVs(0, hexasphereData.Value.thinEdgesChunkUVs[a]);
+                mesh.SetColors(hexasphereData.Value.thinEdgesChunkColors[a]);
+                mesh.SetIndices(hexasphereData.Value.thinEdgesChunkIndices[a], MeshTopology.Lines, 0, false);
+
+                //Назначаем меш мешфильтру
+                meshFilter.sharedMesh = mesh;
+
+                //Назначаем чанку компонент мешрендерера и заносим его в список
+                MeshRenderer meshRenderer = chunkGO.AddComponent<MeshRenderer>();
+                chunksMeshRenderers.Add(meshRenderer);
+
+                //Устанавливаем параметры мешрендерера
+                meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                meshRenderer.sharedMaterial = hexasphereData.Value.thinEdgesMaterial;
+            }
+
+            //Сохраняем списки мешей как массивы
+            hexasphereData.Value.thinEdgesChunkMeshFilters = chunksMeshFilters.ToArray();
+            hexasphereData.Value.thinEdgesChunkMeshes = chunksMeshes.ToArray();
+            hexasphereData.Value.thinEdgesChunkMeshRenderers = chunksMeshRenderers.ToArray();
+        }
+
+        void EdgesThickUpdate()
+        {
+            //Проверяем, какие грани требуется отобразить
+            //Для каждой провинции
+            foreach (int provinceEntity in pRFilter.Value)
+            {
+                //Берём провинцию
+                ref CProvinceCore pC = ref pCPool.Value.Get(provinceEntity);
+                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+                ref CProvinceHexasphere pHS = ref pHSPool.Value.Get(provinceEntity);
+
+                //Обновляем маску граней
+                pHS.thickEdges = 63;
+
+                //Для каждой вершины
+                for (int a = 0; a < pHS.vertices.Length; a++)
+                {
+                    //Берём текущую вершину и следующую
+                    Vector3 p0 = pHS.vertices[a];
+                    Vector3 p1 = a < pHS.vertices.Length - 1 ? pHS.vertices[a + 1] : pHS.vertices[0];
+
+                    //Для каждого соседа
+                    for (int b = 0; b < pC.neighbourProvincePEs.Length; b++)
+                    {
+                        //Берём соседа
+                        pC.neighbourProvincePEs[b].Unpack(world.Value, out int neighbourProvinceEntity);
+                        ref CProvinceCore neighbourPC = ref pCPool.Value.Get(neighbourProvinceEntity);
+                        ref CProvinceRender neighbourPR = ref pRPool.Value.Get(neighbourProvinceEntity);
+                        ref CProvinceHexasphere neighbourPHS = ref pHSPool.Value.Get(neighbourProvinceEntity);
+
+                        //Если индексы граней совпадают
+                        if (pR.ThickEdgesIndex == neighbourPR.ThickEdgesIndex)
+                        {
+                            //Для каждой вершины соседа
+                            for (int c = 0; c < neighbourPHS.vertices.Length; c++)
+                            {
+                                //Берём текущую вершину и следующую
+                                Vector3 q0 = neighbourPHS.vertices[c];
+                                Vector3 q1 = c < neighbourPHS.vertices.Length - 1 ? neighbourPHS.vertices[c + 1] : neighbourPHS.vertices[0];
+
+                                //Если вершины совпадают
+                                if (p0 == q0 && p1 == q1 || p0 == q1 && p1 == q0)
+                                {
+                                    //Обновляем маску граней
+                                    pHS.thickEdges &= 63 - (1 << a);
+
+                                    //Выходим из цикла вплоть до вершины
+                                    b = 9999;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Строим меши граней
+
+            //Определяем индекс чанка и создаём счётчики провинций и вершин
+            int chunkIndex = 0;
+            int provinceCount = 0;
+            int verticesCount = 0;
+
+            //Обновляем списки граней
+            List<Vector3> chunkVertices = HexasphereData.CheckList<Vector3>(ref hexasphereData.Value.thickEdgesChunkVertices[chunkIndex]);
+            List<int> chunkIndices = HexasphereData.CheckList<int>(ref hexasphereData.Value.thickEdgesChunkIndices[chunkIndex]);
+            List<Vector2> chunkUVs = HexasphereData.CheckList<Vector2>(ref hexasphereData.Value.thickEdgesChunkUVs[chunkIndex]);
+            List<Color32> chunkColors = HexasphereData.CheckList<Color32>(ref hexasphereData.Value.thickEdgesChunkColors[chunkIndex]);
+
+            //Для каждой провинции
+            foreach (int provinceEntity in pRFilter.Value)
+            {
+                //Берём провинцию
+                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+                ref CProvinceHexasphere pHS = ref pHSPool.Value.Get(provinceEntity);
+
+                //Если число вершин больше максимального в списке
+                if (verticesCount > HexasphereData.maxVertexArraySize)
+                {
+                    //Увеличиваем индекс чанка
+                    chunkIndex++;
+
+                    //Берём списки нового чанка
+                    chunkVertices = HexasphereData.CheckList<Vector3>(ref hexasphereData.Value.thickEdgesChunkVertices[chunkIndex]);
+                    chunkIndices = HexasphereData.CheckList<int>(ref hexasphereData.Value.thickEdgesChunkIndices[chunkIndex]);
+                    chunkUVs = HexasphereData.CheckList<Vector2>(ref hexasphereData.Value.thickEdgesChunkUVs[chunkIndex]);
+                    chunkColors = HexasphereData.CheckList<Color32>(ref hexasphereData.Value.thickEdgesChunkColors[chunkIndex]);
+
+                    //Обнуляем счётчик вершин
+                    verticesCount = 0;
+                }
+
+                //Создаём структуру для UV-координат
+                Vector2 uVExtruded = new(provinceCount, pR.ProvinceHeight);
+
+                //Определяем положение данных провинции в чанках
+                pHS.parentThickEdgesChunkIndex = chunkIndex;
+                pHS.parentThickEdgesChunkStart = verticesCount;
+                pHS.parentThickEdgesChunkLength = 0;
+
+                //Определяем цвет провинции
+                Color32 provinceColor = Color.white;
+
+                //Сохраняем последнюю вершину в списке
+                int vertex0 = verticesCount;
+
+                //Создаём переменные для отслеживания
+                bool vertexRequired = false;
+                bool vertex0Missing = true;
+
+                //Для каждой вершины провинции
+                for (int a = 0; a < pHS.vertexPoints.Length; a++)
+                {
+                    //Определяем, видима ли грань
+                    bool segmentVisible = (pHS.thickEdges & (1 << a)) != 0;
+
+                    //Если грань видима или вершина необходима
+                    if (segmentVisible || vertexRequired)
+                    {
+                        //Заносим вершину в списки
+                        chunkVertices.Add(pHS.vertexPoints[a].ProjectedVector3);
+                        chunkUVs.Add(uVExtruded);
+                        chunkColors.Add(provinceColor);
+
+                        //Если вершина необходима
+                        if (vertexRequired == true)
+                        {
+                            //Закрываем предыдущий сегмент
+                            chunkIndices.Add(verticesCount);
+                        }
+
+                        //Если грань видима
+                        if (segmentVisible == true)
+                        {
+                            //Начинаем новый сегмент
+                            chunkIndices.Add(verticesCount);
+
+                            //Если это первая вершина
+                            if (a == 0)
+                            {
+                                //Указываем, что нулевая вершина не отсутствует
+                                vertex0Missing = false;
+                            }
+                        }
+
+                        //Увеличиваем счётчик вершин
+                        verticesCount++;
+
+                        //Увеличиваем длину данных провинции в чанке
+                        pHS.parentThickEdgesChunkLength++;
+                    }
+
+                    //Заменяем необходимость вершины на видимость грани
+                    vertexRequired = segmentVisible;
+                }
+
+                //Если вершина необходима
+                if (vertexRequired == true)
+                {
+                    //Если нулевая вершина отсутствует
+                    if (vertex0Missing == true)
+                    {
+                        //Заносим первую вершину провинции в списки
+                        chunkVertices.Add(pHS.vertexPoints[0].ProjectedVector3);
+                        chunkUVs.Add(uVExtruded);
+                        chunkColors.Add(provinceColor);
+                        chunkIndices.Add(verticesCount);
+
+                        //Увеличиваем счётчик вершин
+                        verticesCount++;
+                    }
+                    //Иначе
+                    else
+                    {
+                        //Заносим сохранённую нулевую вершину в список
+                        chunkIndices.Add(vertex0);
+                    }
+                }
+            }
+
+            //Удаляем родительский объект граней, если он не пуст
+            if (HexasphereData.thickEdgesRootGO != null)
+            {
+                Object.DestroyImmediate(HexasphereData.thickEdgesRootGO);
+            }
+
+            //Создаём родительский GO для граней и сохраняем его
+            GameObject edgesRootGO = MapCreateGOAndParent(
+                HexasphereData.HexasphereGO.transform,
+                HexasphereData.thickEdgesRootGOName);
+            HexasphereData.thickEdgesRootGO = edgesRootGO;
+
+            //Создаём списки мешфильтров, мешей и мешрендереров для граней
+            List<MeshFilter> chunksMeshFilters = new();
+            List<Mesh> chunksMeshes = new();
+            List<MeshRenderer> chunksMeshRenderers = new();
+
+            //Для каждого чанка
+            for (int a = 0; a <= chunkIndex; a++)
+            {
+                //Создаём GO чанка граней
+                GameObject chunkGO = MapCreateGOAndParent(
+                    edgesRootGO.transform,
+                    HexasphereData.thickEdgeChunkGOName);
+
+                //Назначаем чанку компонент мешфильтра и заносим его в список
+                MeshFilter meshFilter = chunkGO.AddComponent<MeshFilter>();
+                chunksMeshFilters.Add(meshFilter);
+
+                //Создаём меш и заносим его в список
+                Mesh mesh = new();
+                chunksMeshes.Add(mesh);
+
+                //Заполняем меш вершинами, UV, цветами и индексами
+                mesh.SetVertices(hexasphereData.Value.thickEdgesChunkVertices[a]);
+                mesh.SetUVs(0, hexasphereData.Value.thickEdgesChunkUVs[a]);
+                mesh.SetColors(hexasphereData.Value.thickEdgesChunkColors[a]);
+                mesh.SetIndices(hexasphereData.Value.thickEdgesChunkIndices[a], MeshTopology.Lines, 0, false);
+
+                //Назначаем меш мешфильтру
+                meshFilter.sharedMesh = mesh;
+
+                //Назначаем чанку компонент мешрендерера и заносим его в список
+                MeshRenderer meshRenderer = chunkGO.AddComponent<MeshRenderer>();
+                chunksMeshRenderers.Add(meshRenderer);
+
+                //Устанавливаем параметры мешрендерера
+                meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                meshRenderer.sharedMaterial = hexasphereData.Value.thickEdgesMaterial;
+            }
+
+            //Сохраняем списки мешей как массивы
+            hexasphereData.Value.thickEdgesChunkMeshFilters = chunksMeshFilters.ToArray();
+            hexasphereData.Value.thickEdgesChunkMeshes = chunksMeshes.ToArray();
+            hexasphereData.Value.thickEdgesChunkMeshRenderers = chunksMeshRenderers.ToArray();
+        }
+
         void ProvinceHeightsUpdate()
         {
             //Для каждой провинции
@@ -498,7 +1036,8 @@ namespace HS
                 ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
                 ref CProvinceHexasphere pHS = ref pHSPool.Value.Get(provinceEntity);
 
-                //Берём массивы чанка, в котором располагается провинция
+                #region ProvinceMesh
+                //Берём массив чанка, в котором располагается провинция
                 ref Vector4[] chunkUV = ref hexasphereData.Value.chunksUV[pHS.parentChunkIndex];
 
                 //Определяем, какой массив UV использует провинция
@@ -530,6 +1069,41 @@ namespace HS
                     //Заносим координаты в массив координат
                     chunkUV[pHS.parentChunkStart + a] = uV4;
                 }
+                #endregion
+
+                #region EdgesMesh
+                //Берём список чанка тонких граней, в котором располагается провинция
+                List<Vector2> thinEdgesChunkUVs = hexasphereData.Value.thinEdgesChunkUVs[pHS.parentThinEdgesChunkIndex];
+
+                //Для каждой вершины провинции в чанке тонких граней
+                for(int a = 0; a < pHS.parentThinEdgesChunkLength; a++)
+                {
+                    //Берём UV2-координаты вершины
+                    Vector2 uv = thinEdgesChunkUVs[pHS.parentThinEdgesChunkStart + a];
+
+                    //Обновляем высоту провинции
+                    uv.y = pR.ProvinceHeight;
+
+                    //Заносим координаты в список
+                    thinEdgesChunkUVs[pHS.parentThinEdgesChunkStart + a] = uv;
+                }
+
+                //Берём список чанка толстых граней, в котором располагается провинция
+                List<Vector2> thickEdgesChunkUVs = hexasphereData.Value.thickEdgesChunkUVs[pHS.parentThickEdgesChunkIndex];
+
+                //Для каждой вершины провинции в чанке тонких граней
+                for (int a = 0; a < pHS.parentThickEdgesChunkLength; a++)
+                {
+                    //Берём UV2-координаты вершины
+                    Vector2 uv = thickEdgesChunkUVs[pHS.parentThickEdgesChunkStart + a];
+
+                    //Обновляем высоту провинции
+                    uv.y = pR.ProvinceHeight;
+
+                    //Заносим координаты в список
+                    thickEdgesChunkUVs[pHS.parentThickEdgesChunkStart + a] = uv;
+                }
+                #endregion
             }
 
             //Для каждого мешфильтра чанка
@@ -542,6 +1116,30 @@ namespace HS
 
                 //Назначаем мешрендереру материал
                 hexasphereData.Value.chunkMeshRenderers[a].sharedMaterial = hexasphereData.Value.provinceMaterial;
+            }
+
+            //Для каждого мешфильтра тонких граней
+            for(int a = 0;a < hexasphereData.Value.thinEdgesChunkMeshFilters.Length; a++)
+            {
+                //Заполняем меш UV
+                hexasphereData.Value.thinEdgesChunkMeshes[a].SetUVs(0, hexasphereData.Value.thinEdgesChunkUVs[a]);
+
+                hexasphereData.Value.thinEdgesChunkMeshFilters[a].sharedMesh = hexasphereData.Value.thinEdgesChunkMeshes[a];
+
+                //Назначаем мешрендереру материал
+                hexasphereData.Value.thinEdgesChunkMeshRenderers[a].sharedMaterial = hexasphereData.Value.thinEdgesMaterial;
+            }
+
+            //Для каждого мешфильтра толстых граней
+            for (int a = 0; a < hexasphereData.Value.thickEdgesChunkMeshFilters.Length; a++)
+            {
+                //Заполняем меш UV
+                hexasphereData.Value.thickEdgesChunkMeshes[a].SetUVs(0, hexasphereData.Value.thickEdgesChunkUVs[a]);
+
+                hexasphereData.Value.thickEdgesChunkMeshFilters[a].sharedMesh = hexasphereData.Value.thickEdgesChunkMeshes[a];
+
+                //Назначаем мешрендереру материал
+                hexasphereData.Value.thickEdgesChunkMeshRenderers[a].sharedMaterial = hexasphereData.Value.thickEdgesMaterial;
             }
         }
 

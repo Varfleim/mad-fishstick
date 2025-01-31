@@ -121,7 +121,7 @@ namespace HS
                     if (triangles[b].orderedFlag != flag
                         //Если текущий временный треугольник не пуст
                         && tempTriangles[a] != null
-                        //Если треугольники соседни
+                        //Если треугольники соседний
                         && triangles[b].IsAdjacentTo(tempTriangles[a]))
                     {
                         //Заносим треугольник в список временных и увеличиваем счётчик

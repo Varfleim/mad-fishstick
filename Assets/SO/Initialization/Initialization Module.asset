@@ -14,16 +14,56 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapNames:
   - TestMap1
-  hexasphereSubdivisions: 20
+  hexasphereSubdivisions: 50
   averageProvincesPerRegion: 50
   agentNames:
   - TestAgent1
-  - TestAgent2
-  - TestAgent3
-  - TestAgent4
-  - TestAgent5
-  - TestAgent6
-  - TestAgent7
-  - TestAgent8
-  - TestAgent9
-  - TestAgent10
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1
+  - TestAgent1

@@ -84,16 +84,42 @@ namespace MF.Map
             requestComp = new(0);
         }
 
-         public static void SetMapRenderValuesRequestFull(
-            EcsPool<SRSetMapRenderValues> requestPool,
-            ref CMapModeCore mapMode,
+        public static void UpdateThinEdgesRequest(
+            EcsPool<SRUpdateThinEdges> requestPool,
             int targetEntity,
-            EcsPackedEntity displayedObjectPE,
-            float height,
-            int colorIndex)
+            int edgeIndex)
         {
             //Назначаем сущности запрос
-            ref SRSetMapRenderValues requestComp = ref requestPool.Add(targetEntity);
+            ref SRUpdateThinEdges requestComp = ref requestPool.Add(targetEntity);
+
+            //Заполняем данные запроса
+            requestComp = new(
+                edgeIndex);
+        }
+        
+        public static void UpdateThickEdgesRequest(
+            EcsPool<SRUpdateThickEdges> requestPool,
+            int targetEntity,
+            int edgeIndex)
+        {
+            //Назначаем сущности запрос
+            ref SRUpdateThickEdges requestComp = ref requestPool.Add(targetEntity);
+
+            //Заполняем данные запроса
+            requestComp = new(
+                edgeIndex);
+        }
+
+        public static void UpdateProvinceRenderRequestFull(
+           EcsPool<SRUpdateProvinceRender> requestPool,
+           ref CMapModeCore mapMode,
+           int targetEntity,
+           EcsPackedEntity displayedObjectPE,
+           float height,
+           int colorIndex)
+        {
+            //Назначаем сущности запрос
+            ref SRUpdateProvinceRender requestComp = ref requestPool.Add(targetEntity);
 
             //Заполняем данные запроса
             requestComp = new(
@@ -102,20 +128,17 @@ namespace MF.Map
                 colorIndex);
         }
 
-        public static void SetMapRenderValuesRequestCreation(
-            EcsPool<SRSetMapRenderValues> requestPool,
+        public static void UpdateProvinceRenderRequestCreation(
+            EcsPool<SRUpdateProvinceRender> requestPool,
             int targetEntity)
         {
             //Назначаем сущности запрос
-            ref SRSetMapRenderValues requestComp = ref requestPool.Add(targetEntity);
-
-            //Заполняем данные запроса стандартными данными
-            requestComp = new(0);
+            ref SRUpdateProvinceRender requestComp = ref requestPool.Add(targetEntity);
         }
 
-        public static void SetMapRenderValuesRequestUpdate(
+        public static void UpdateProvinceRenderRequestUpdate(
             ref CMapModeCore mapMode,
-            ref SRSetMapRenderValues requestComp,
+            ref SRUpdateProvinceRender requestComp,
             EcsPackedEntity displayedObjectPE,
             float height,
             int colorIndex)
@@ -145,10 +168,52 @@ namespace MF.Map
             EcsPackedEntity displayedObjectPE)
         {
             //Если отображаемый объект провинции не равен переданному
-            if(pR.DisplayedObjectPE.EqualsTo(in displayedObjectPE) == false)
+            if (pR.DisplayedObjectPE.EqualsTo(in displayedObjectPE) == false)
             {
                 //Обновляем его
-                pR.SetProvinceDisplayedObject(displayedObjectPE);
+                pR.SetDisplayedObject(displayedObjectPE);
+            }
+        }
+
+        internal static bool UpdateProvinceThinEdgesIndex(
+            ref CProvinceRender pR,
+            int newThinEdgesIndex)
+        {
+            //Если индекс тонких граней провинции не равен переданному
+            if(pR.ThinEdgesIndex != newThinEdgesIndex)
+            {
+                //Обновляем его
+                pR.SetThinEdgesIndex(newThinEdgesIndex);
+
+                //Возвращаем, что индекс был обновлён
+                return true;
+            }
+            //Иначе
+            else
+            {
+                //Возвращаем, что индекс не был обновлён
+                return false;
+            }
+        }
+
+        internal static bool UpdateProvinceThickEdgesIndex(
+            ref CProvinceRender pR,
+            int newThickEdgesIndex)
+        {
+            //Если индекс толстых граней провинции не равен переданному
+            if (pR.ThickEdgesIndex != newThickEdgesIndex)
+            {
+                //Обновляем его
+                pR.SetThickEdgesIndex(newThickEdgesIndex);
+
+                //Возвращаем, что индекс был обновлён
+                return true;
+            }
+            //Иначе
+            else
+            {
+                //Возвращаем, что индекс не был обновлён
+                return false;
             }
         }
 
@@ -158,10 +223,10 @@ namespace MF.Map
             float newProvinceHeight)
         {
             //Если высота провинции не равна переданной
-            if(pR.ProvinceHeight != newProvinceHeight)
+            if (pR.ProvinceHeight != newProvinceHeight)
             {
                 //Обновляем её
-                pR.SetProvinceHeight(newProvinceHeight);
+                pR.SetHeight(newProvinceHeight);
 
                 //Возвращаем, что высота была обновлена
                 return true;
@@ -183,7 +248,7 @@ namespace MF.Map
             if (pR.ProvinceColorIndex != newProvinceColorIndex)
             {
                 //Обновляем его
-                pR.SetProvinceColorIndex(newProvinceColorIndex);
+                pR.SetColorIndex(newProvinceColorIndex);
 
                 //Возвращаем, что индекс цвета был обновлён
                 return true;

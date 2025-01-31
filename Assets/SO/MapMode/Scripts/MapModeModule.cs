@@ -22,6 +22,10 @@ namespace SO.MapMode
             //Создание режимов карты
             startup.AddPreInitSystem(new SMapModesCreation());
             #endregion
+            #region PostInit
+            //Создание постоянных границ
+            startup.AddPostInitSystem(new SMapPermanentEdgesCreation());
+            #endregion
 
             //Добавляем покадровые системы
             #region Frame

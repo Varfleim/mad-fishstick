@@ -17,6 +17,7 @@ namespace HS
         internal static GameObject provincesRootGO;
 
         internal const int maxVertexCountPerChunk = 65500;
+        internal const int maxVertexArraySize = 65530;
 
         internal static readonly int[] hexagonIndices = new int[] {
             0, 1, 5,
@@ -103,6 +104,58 @@ namespace HS
         internal Mesh[] chunkMeshes;
         internal MeshRenderer[] chunkMeshRenderers;
 
+        internal static List<T> CheckList<T>(ref List<T> list)
+        {
+            if(list == null)
+            {
+                list = new List<T>(maxVertexArraySize);
+            }
+            else
+            {
+                list.Clear();
+            }
+
+            return list;
+        }
+
+        #region ThinEdges
+        internal const string thinEdgesRootGOName = "ThinEdgesRoot";
+        internal static GameObject thinEdgesRootGO;
+        internal const string thinEdgeChunkGOName = "ThinEdgesChunk";
+
+        internal List<Vector3>[] thinEdgesChunkVertices = new List<Vector3>[0];
+        internal List<int>[] thinEdgesChunkIndices = new List<int>[0];
+        internal List<Vector2>[] thinEdgesChunkUVs = new List<Vector2>[0];
+        internal List<Color32>[] thinEdgesChunkColors = new List<Color32>[0];
+
+        internal MeshFilter[] thinEdgesChunkMeshFilters = new MeshFilter[0];
+        internal Mesh[] thinEdgesChunkMeshes = new Mesh[0];
+        internal MeshRenderer[] thinEdgesChunkMeshRenderers = new MeshRenderer[0];
+
+        internal Material thinEdgesMaterial;
+        internal Color thinEdgesColor;
+        internal float thinEdgesColorIntensity;
+        #endregion
+
+        #region ThickEdges
+        internal const string thickEdgesRootGOName = "ThickEdgesRoot";
+        internal static GameObject thickEdgesRootGO;
+        internal const string thickEdgeChunkGOName = "ThickEdgesChunk";
+
+        internal List<Vector3>[] thickEdgesChunkVertices = new List<Vector3>[0];
+        internal List<int>[] thickEdgesChunkIndices = new List<int>[0];
+        internal List<Vector2>[] thickEdgesChunkUVs = new List<Vector2>[0];
+        internal List<Color32>[] thickEdgesChunkColors = new List<Color32>[0];
+
+        internal MeshFilter[] thickEdgesChunkMeshFilters = new MeshFilter[0];
+        internal Mesh[] thickEdgesChunkMeshes = new Mesh[0];
+        internal MeshRenderer[] thickEdgesChunkMeshRenderers = new MeshRenderer[0];
+
+        internal Material thickEdgesMaterial;
+        internal Color thickEdgesColor;
+        internal float thickEdgesColorIntensity;
+        #endregion
+
         //Îáúåêòû
         public static GameObject HexasphereGO;
         internal static SphereCollider HexasphereCollider;
@@ -118,7 +171,8 @@ namespace HS
         internal Color ambientColor;
         internal float minimumLight;
 
-        internal int uvChunkCount;
+
+        //internal int uvChunkCount;
 
         internal Texture2D bevelNormals;
         internal Color[] bevelNormalsColors;

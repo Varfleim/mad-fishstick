@@ -28,7 +28,7 @@ namespace MF.Map
         public Color GetProvinceColor(
             ref CProvinceRender pR)
         {
-            if(pR.ProvinceColorIndex != -1)
+            if(pR.ProvinceColorIndex > -1)
             {
                 return colors[pR.ProvinceColorIndex];
             }

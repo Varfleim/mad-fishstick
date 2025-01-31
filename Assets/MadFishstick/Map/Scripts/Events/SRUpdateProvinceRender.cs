@@ -3,19 +3,9 @@ using Leopotam.EcsLite;
 
 namespace MF.Map
 {
-    public readonly struct SRSetMapRenderValues
+    public readonly struct SRUpdateProvinceRender
     {
-        public SRSetMapRenderValues(
-            int a)
-        {
-            displayedObjectPE = new();
-
-            height = 0.01f;
-
-            colorIndex = -1;
-        }
-
-        public SRSetMapRenderValues(
+        public SRUpdateProvinceRender(
             EcsPackedEntity displayedObjectPE,
             float height, 
             int colorIndex)

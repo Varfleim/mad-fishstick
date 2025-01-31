@@ -9,7 +9,7 @@
 
 
         SubShader{
-            Tags { "Queue" = "Geometry-2" "RenderPipeline" = "UniversalPipeline" }
+            Tags { "Queue" = "Geometry-5" "RenderPipeline" = "UniversalPipeline" }
             Blend[_SrcBlend][_DstBlend]
             ZWrite[_ZWrite]
 

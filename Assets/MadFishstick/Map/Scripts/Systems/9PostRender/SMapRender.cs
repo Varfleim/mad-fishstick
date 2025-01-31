@@ -12,36 +12,162 @@ namespace MF.Map
         readonly EcsFilterInject<Inc<CMapModeCore, CActiveMapMode, SRMapModeUpdate>> activeMapModeFilter = default;
         readonly EcsPoolInject<CMapModeCore> mapModePool = default;
 
+        readonly EcsPoolInject<CProvinceRender> pRPool = default;
+        readonly EcsFilterInject<Inc<CProvinceRender, SRUpdateThinEdges>> provinceUpdateThinEdgesSRFilter = default;
+        readonly EcsFilterInject<Inc<CProvinceRender>, Exc<SRUpdateThinEdges>> provinceWithoutUpdateThinEdgesSRFilter = default;
+        readonly EcsPoolInject<SRUpdateThinEdges> updateThinEdgesSRPool = default;
+        readonly EcsFilterInject<Inc<CProvinceRender, SRUpdateThickEdges>> provinceUpdateThickEdgesSRFilter = default;
+        readonly EcsFilterInject<Inc<CProvinceRender>, Exc<SRUpdateThickEdges>> provinceWithoutUpdateThickEdgesSRFilter = default;
+        readonly EcsPoolInject<SRUpdateThickEdges> updateThickEdgesSRPool = default;
 
-        readonly EcsPoolInject<RMapRenderUpdate> mapRenderUpdateRequestPool = default;
-
+        readonly EcsPoolInject<RMapEdgesUpdate> mapEdgesUpdateRPool = default;
+        readonly EcsPoolInject<RMapProvincesUpdate> mapProvincesUpdateRPool = default;
+        
         public void Run(IEcsSystems systems)
         {
+            //Обновляем данные граней
+            MapEdgesDataUpdate();
+
             //Для каждого активного режима карты с запросом обновления
             foreach(int activeMapModeEntity in activeMapModeFilter.Value)
             {
                 //Берём режим карты
                 ref CMapModeCore activeMapMode = ref mapModePool.Value.Get(activeMapModeEntity);
 
-                //Устанавливаем параметры визуализации провинций на карте
-                ProvinceSetMapRenderValues(
+                //Обновляем данные визуализации провинций
+                MapProvinceRenderDataUpdate(
                     ref activeMapMode,
                     out bool isHeightUpdated,
                     out bool isColorUpdated);
 
-                //Запрашиваем обновление карты
-                MapData.MapRenderUpdateRequest(
+                //Запрашиваем обновление визуализации провинций карты
+                MapData.MapProvincesUpdateRequest(
                     world.Value,
-                    mapRenderUpdateRequestPool.Value,
+                    mapProvincesUpdateRPool.Value,
                     false, isHeightUpdated, isColorUpdated);
             }
         }
 
-        readonly EcsFilterInject<Inc<CProvinceRender, SRSetMapRenderValues>> provinceSetMapRenderValuesFilter = default;
-        readonly EcsFilterInject<Inc<CProvinceRender>, Exc<SRSetMapRenderValues>> provinceWithoutSetMapRenderValuesFilter = default;
-        readonly EcsPoolInject<CProvinceRender> pRPool = default;
-        readonly EcsPoolInject<SRSetMapRenderValues> setMapRenderValuesSelfRequestPool = default;
-        void ProvinceSetMapRenderValues(
+        void MapEdgesDataUpdate()
+        {
+            //Проверяем, какие грани требуется обновить
+            bool isThinUpdated = false;
+            bool isThickUpdated = false;
+
+            //Если фильтр обновления тонких граней не пуст
+            if (provinceUpdateThinEdgesSRFilter.Value.GetEntitiesCount() > 0)
+            {
+                //Обновляем тонкие грани
+                MapThinEdgesDataUpdate(out isThinUpdated);
+            }
+
+            //Если фильтр обновления толстых граней не пуст
+            if(provinceUpdateThickEdgesSRFilter.Value.GetEntitiesCount() > 0)
+            {
+                //Обновляем толстые грани
+                MapThickEdgesDataUpdate(out isThickUpdated);
+            }
+
+            //Если какие-либо грани были обновлены
+            if(isThinUpdated == true
+                || isThickUpdated == true)
+            {
+                //Запрашиваем обновление граней карты
+                MapData.MapEdgesUpdateRequest(
+                    world.Value,
+                    mapEdgesUpdateRPool.Value,
+                    isThinUpdated, isThickUpdated);
+            }
+        }
+
+        void MapThinEdgesDataUpdate(
+            out bool isThinUpdated)
+        {
+            //Устанавливаем значение по умолчанию
+            isThinUpdated = false;
+
+            //Для каждой провинции без запроса обновления тонких граней
+            foreach (int provinceEntity in provinceWithoutUpdateThinEdgesSRFilter.Value)
+            {
+                //Берём провинцию
+                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+
+                //Обновляем индекс тонких граней провинции
+                isThinUpdated = MapModeData.UpdateProvinceThinEdgesIndex(
+                    ref pR,
+                    -1);
+            }
+
+            //Если нет провинций с запросом
+            if (provinceUpdateThinEdgesSRFilter.Value.GetEntitiesCount() == 0)
+            {
+                //Отмечаем, что требуется обновление карты
+                isThinUpdated = true;
+            }
+
+            //Для каждой провинции с запросом
+            foreach (int provinceEntity in provinceUpdateThinEdgesSRFilter.Value)
+            {
+                //Берём провинцию и запрос
+                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+                ref SRUpdateThinEdges requestComp = ref updateThinEdgesSRPool.Value.Get(provinceEntity);
+
+                //Обновляем индекс тонких граней провинции
+                isThinUpdated = MapModeData.UpdateProvinceThinEdgesIndex(
+                    ref pR,
+                    requestComp.edgeIndex);
+
+                //Удаляем запрос
+                updateThinEdgesSRPool.Value.Del(provinceEntity);
+            }
+        }
+
+        void MapThickEdgesDataUpdate(
+            out bool isThickUpdated)
+        {
+            //Устанавливаем значение по умолчанию
+            isThickUpdated = false;
+
+            //Для каждой провинции без запроса обновления толстых граней
+            foreach (int provinceEntity in provinceWithoutUpdateThickEdgesSRFilter.Value)
+            {
+                //Берём провинцию
+                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+
+                //Обновляем индекс толстых граней провинции
+                isThickUpdated = MapModeData.UpdateProvinceThickEdgesIndex(
+                    ref pR,
+                    -1);
+            }
+
+            //Если нет провинций с запросом
+            if (provinceUpdateThickEdgesSRFilter.Value.GetEntitiesCount() == 0)
+            {
+                //Отмечаем, что требуется обновление карты
+                isThickUpdated = true;
+            }
+
+            //Для каждой провинции с запросом
+            foreach (int provinceEntity in provinceUpdateThickEdgesSRFilter.Value)
+            {
+                //Берём провинцию и запрос
+                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+                ref SRUpdateThickEdges requestComp = ref updateThickEdgesSRPool.Value.Get(provinceEntity);
+
+                //Обновляем индекс толстых граней провинции
+                isThickUpdated = MapModeData.UpdateProvinceThickEdgesIndex(
+                    ref pR,
+                    requestComp.edgeIndex);
+
+                //Удаляем запрос
+                updateThickEdgesSRPool.Value.Del(provinceEntity);
+            }
+        }
+
+        readonly EcsFilterInject<Inc<CProvinceRender, SRUpdateProvinceRender>> provinceUpdateProvinceRenderSRFilter = default;
+        readonly EcsFilterInject<Inc<CProvinceRender>, Exc<SRUpdateProvinceRender>> provinceWithoutUpdateProvinceRenderSRFilter = default;
+        readonly EcsPoolInject<SRUpdateProvinceRender> updateProvinceRenderSRPool = default;
+        void MapProvinceRenderDataUpdate(
             ref CMapModeCore mapMode,
             out bool isHeightUpdated, out bool isColorUpdated)
         {
@@ -49,8 +175,8 @@ namespace MF.Map
             isHeightUpdated = false;
             isColorUpdated = false;
 
-            //Для каждой провинции без запроса изменения визуализации
-            foreach (int provinceEntity in provinceWithoutSetMapRenderValuesFilter.Value)
+            //Для каждой провинции без запроса обновления визуализации
+            foreach (int provinceEntity in provinceWithoutUpdateProvinceRenderSRFilter.Value)
             {
                 //Берём провинцию
                 ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
@@ -73,20 +199,20 @@ namespace MF.Map
                     -1);
             }
 
-            //Если нет провинций с изменением запроса визуализации
-            if(provinceSetMapRenderValuesFilter.Value.GetEntitiesCount() == 0)
+            //Если нет провинций с запросом
+            if(provinceUpdateProvinceRenderSRFilter.Value.GetEntitiesCount() == 0)
             {
                 //Отмечаем, что требуется обновление карты
                 isHeightUpdated = true;
                 isColorUpdated = true;
             }
 
-            //Для каждой провинции с запросом изменения визуализации
-            foreach (int provinceEntity in provinceSetMapRenderValuesFilter.Value)
+            //Для каждой провинции с запросом
+            foreach (int provinceEntity in provinceUpdateProvinceRenderSRFilter.Value)
             {
                 //Берём провинцию и запрос
                 ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
-                ref SRSetMapRenderValues requestComp = ref setMapRenderValuesSelfRequestPool.Value.Get(provinceEntity);
+                ref SRUpdateProvinceRender requestComp = ref updateProvinceRenderSRPool.Value.Get(provinceEntity);
 
                 //Обновляем отображаемый объект провинции
                 MapModeData.UpdateProvinceDisplayedObject(
@@ -106,7 +232,7 @@ namespace MF.Map
                     requestComp.colorIndex);
 
                 //Удаляем запрос
-                setMapRenderValuesSelfRequestPool.Value.Del(provinceEntity);
+                updateProvinceRenderSRPool.Value.Del(provinceEntity);
             }
         }
     }

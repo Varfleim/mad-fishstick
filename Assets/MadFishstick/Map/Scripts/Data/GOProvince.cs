@@ -24,7 +24,7 @@ namespace MF.Map
             provinceGO.transform.SetParent(null);
 
             //Удаляем ссылку на GO
-            pR.SetProvinceGO(null);
+            pR.SetGO(null);
         }
 
         public static void InstantiateProvinceGO(
@@ -57,7 +57,7 @@ namespace MF.Map
             provinceGO.transform.localRotation = Quaternion.Euler(0, 0, 0);
 
             //Даём PR ссылку на GO
-            pR.SetProvinceGO(provinceGO);
+            pR.SetGO(provinceGO);
         }
     }
 }

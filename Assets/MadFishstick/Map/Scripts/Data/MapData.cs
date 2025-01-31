@@ -33,14 +33,28 @@ namespace MF.Map
             requestComp = new(0);
         }
 
-        public static void MapRenderUpdateRequest(
+        public static void MapEdgesUpdateRequest(
             EcsWorld world,
-            EcsPool<RMapRenderUpdate> requestPool,
+            EcsPool<RMapEdgesUpdate> requestPool,
+            bool isThinUpdated, bool isThickUpdated)
+        {
+            //Создаём новую сущность и назначаем ей запрос
+            int requestEntity = world.NewEntity();
+            ref RMapEdgesUpdate requestComp = ref requestPool.Add(requestEntity);
+
+            //Заполняем данные запроса
+            requestComp = new(
+                isThinUpdated, isThickUpdated, false);
+        }
+
+        public static void MapProvincesUpdateRequest(
+            EcsWorld world,
+            EcsPool<RMapProvincesUpdate> requestPool,
             bool isMaterialUpdated, bool isHeightUpdated, bool isColorUpdated)
         {
             //Создаём новую сущность и назначаем ей запрос
             int requestEntity = world.NewEntity();
-            ref RMapRenderUpdate requestComp = ref requestPool.Add(requestEntity);
+            ref RMapProvincesUpdate requestComp = ref requestPool.Add(requestEntity);
 
             //Заполняем данные запроса
             requestComp = new(

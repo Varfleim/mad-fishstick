@@ -1,9 +1,9 @@
 
 namespace MF.Map
 {
-    public readonly struct RMapRenderUpdate
+    public readonly struct RMapProvincesUpdate
     {
-        public RMapRenderUpdate(
+        public RMapProvincesUpdate(
             bool isMaterialUpdated, bool isHeightUpdated, bool isColorUpdated)
         {
             this.isMaterialUpdated = isMaterialUpdated;

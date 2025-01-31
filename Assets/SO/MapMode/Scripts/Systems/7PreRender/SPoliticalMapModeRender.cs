@@ -11,15 +11,15 @@ namespace SO.MapMode
     {
         readonly EcsFilterInject<Inc<CAgentLandOwner>> aLandOwnerFilter = default;
 
-        readonly EcsPoolInject<SRSetMapRenderValues> setMapRenderValuesSelfRequestsPool = default;
+        readonly EcsPoolInject<SRUpdateProvinceRender> setMapRenderValuesSelfRequestsPool = default;
 
         public void Run(IEcsSystems systems)
         {
             //Для каждого владельца земли
             foreach (int aLandOwnerEntity in aLandOwnerFilter.Value)
             {
-                //Создаём запрос изменения визуализации
-                MF.Map.MapModeData.SetMapRenderValuesRequestCreation(
+                //Создаём запрос обновления визуализации провинций для него
+                MF.Map.MapModeData.UpdateProvinceRenderRequestCreation(
                     setMapRenderValuesSelfRequestsPool.Value,
                     aLandOwnerEntity);
             }

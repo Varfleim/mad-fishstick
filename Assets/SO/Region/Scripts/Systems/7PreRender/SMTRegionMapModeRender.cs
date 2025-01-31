@@ -8,7 +8,7 @@ using MF.Map;
 namespace SO.Region
 {
     public class SMTRegionMapModeRender : EcsThreadSystem<TRegionMapModeRender,
-        CRegionCore, SRSetMapRenderValues,
+        CRegionCore, SRUpdateProvinceRender,
         CMapModeCore>
     {
         readonly EcsWorldInject world = default;
@@ -27,7 +27,7 @@ namespace SO.Region
 
         protected override EcsFilter GetFilter(EcsWorld world)
         {
-            return world.Filter<CRegionCore>().Inc<SRSetMapRenderValues>().End();
+            return world.Filter<CRegionCore>().Inc<SRUpdateProvinceRender>().End();
         }
 
         protected override void SetData(IEcsSystems systems, ref TRegionMapModeRender thread)

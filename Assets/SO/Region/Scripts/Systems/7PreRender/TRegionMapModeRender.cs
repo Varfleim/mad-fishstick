@@ -7,7 +7,7 @@ using MF.Map;
 namespace SO.Region
 {
     public struct TRegionMapModeRender : IEcsThread<
-        CRegionCore, SRSetMapRenderValues,
+        CRegionCore, SRUpdateProvinceRender,
         CMapModeCore>
     {
         public EcsWorld world;
@@ -19,8 +19,8 @@ namespace SO.Region
         CRegionCore[] rCPool;
         int[] rCIndices;
 
-        SRSetMapRenderValues[] setMapRenderValuesRequestPool;
-        int[] setMapRenderValuesRequestIndices;
+        SRUpdateProvinceRender[] updateProvinceRenderSRPool;
+        int[] updateProvinceRenderSRIndices;
 
         CMapModeCore[] mapModePool;
         int[] mapModeIndices;
@@ -28,7 +28,7 @@ namespace SO.Region
         public void Init(
             int[] entities,
             CRegionCore[] pool1, int[] indices1,
-            SRSetMapRenderValues[] pool2, int[] indices2,
+            SRUpdateProvinceRender[] pool2, int[] indices2,
             CMapModeCore[] pool3, int[] indices3)
         {
             regionEntities = entities;
@@ -36,8 +36,8 @@ namespace SO.Region
             rCPool = pool1;
             rCIndices = indices1;
 
-            setMapRenderValuesRequestPool = pool2;
-            setMapRenderValuesRequestIndices = indices2;
+            updateProvinceRenderSRPool = pool2;
+            updateProvinceRenderSRIndices = indices2;
 
             mapModePool = pool3;
             mapModeIndices = indices3;
@@ -51,13 +51,13 @@ namespace SO.Region
 
             for(int a = fromIndex; a < beforeIndex; a++)
             {
-                //Берём регион и запрос изменения визуализации
+                //Берём регион и запрос обновления визуализации провинци
                 int regionEntity = regionEntities[a];
                 ref CRegionCore rC = ref rCPool[rCIndices[regionEntity]];
-                ref SRSetMapRenderValues requestComp = ref setMapRenderValuesRequestPool[setMapRenderValuesRequestIndices[regionEntity]];
+                ref SRUpdateProvinceRender requestComp = ref updateProvinceRenderSRPool[updateProvinceRenderSRIndices[regionEntity]];
 
-                //Изменяем запрос изменения визуализации, задавая ему цвет региона
-                MF.Map.MapModeData.SetMapRenderValuesRequestUpdate(
+                //Изменяем запрос, задавая ему цвет региона
+                MF.Map.MapModeData.UpdateProvinceRenderRequestUpdate(
                     ref mapModeCore,
                     ref requestComp,
                     rC.selfPE,

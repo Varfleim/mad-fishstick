@@ -7,7 +7,7 @@ using MF.Map;
 namespace HS
 {
     public struct TDefaultMapModeRender : IEcsThread<
-        CProvinceRender, CProvinceHexasphere, SRSetMapRenderValues,
+        CProvinceRender, CProvinceHexasphere, SRUpdateProvinceRender,
         CMapModeCore>
     {
         public EcsWorld world;
@@ -22,8 +22,8 @@ namespace HS
         CProvinceHexasphere[] pHSPool;
         int[] pHSIndices;
 
-        SRSetMapRenderValues[] setMapRenderValuesRequestPool;
-        int[] setMapRenderValuesRequestIndices;
+        SRUpdateProvinceRender[] updateProvinceRenderSRPool;
+        int[] updateProvinceRenderSRIndices;
 
         CMapModeCore[] mapModePool;
         int[] mapModeIndices;
@@ -32,7 +32,7 @@ namespace HS
             int[] entities,
             CProvinceRender[] pool1, int[] indices1,
             CProvinceHexasphere[] pool2, int[] indices2,
-            SRSetMapRenderValues[] pool3, int[] indices3,
+            SRUpdateProvinceRender[] pool3, int[] indices3,
             CMapModeCore[] pool4, int[] indices4)
         {
             provinceEntities = entities;
@@ -43,8 +43,8 @@ namespace HS
             pHSPool = pool2;
             pHSIndices = indices2;
 
-            setMapRenderValuesRequestPool = pool3;
-            setMapRenderValuesRequestIndices = indices3;
+            updateProvinceRenderSRPool = pool3;
+            updateProvinceRenderSRIndices = indices3;
 
             mapModePool = pool4;
             mapModeIndices = indices4;
@@ -59,14 +59,14 @@ namespace HS
             //Для каждой провинции в потоке
             for(int a = fromIndex; a < beforeIndex; a++)
             {
-                //Берём провинцию и запрос изменения визуализации
+                //Берём провинцию и запрос обновления визуализации
                 int provinceEntity = provinceEntities[a];
                 ref CProvinceRender pR = ref pRPool[pRIndices[provinceEntity]];
                 ref CProvinceHexasphere pHS = ref pHSPool[pHSIndices[provinceEntity]];
-                ref SRSetMapRenderValues requestComp = ref setMapRenderValuesRequestPool[setMapRenderValuesRequestIndices[provinceEntity]];
+                ref SRUpdateProvinceRender requestComp = ref updateProvinceRenderSRPool[updateProvinceRenderSRIndices[provinceEntity]];
 
-                //Изменяем запрос изменения визуализации соответственно режиму карты
-                MF.Map.MapModeData.SetMapRenderValuesRequestUpdate(
+                //Изменяем запрос соответственно режиму карты
+                MF.Map.MapModeData.UpdateProvinceRenderRequestUpdate(
                     ref mapModeCore,
                     ref requestComp,
                     pHS.selfPE,

@@ -8,7 +8,7 @@ using MF.Map;
 namespace HS
 {
     public class SMTDefaultMapModeRender : EcsThreadSystem<TDefaultMapModeRender,
-        CProvinceRender, CProvinceHexasphere, SRSetMapRenderValues,
+        CProvinceRender, CProvinceHexasphere, SRUpdateProvinceRender,
         CMapModeCore>
     {
         readonly EcsWorldInject world = default;
@@ -27,7 +27,7 @@ namespace HS
 
         protected override EcsFilter GetFilter(EcsWorld world)
         {
-            return world.Filter<CProvinceRender>().Inc<CProvinceHexasphere>().Inc<SRSetMapRenderValues>().End();
+            return world.Filter<CProvinceRender>().Inc<CProvinceHexasphere>().Inc<SRUpdateProvinceRender>().End();
         }
 
         protected override void SetData(IEcsSystems systems, ref TDefaultMapModeRender thread)

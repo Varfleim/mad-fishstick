@@ -16,14 +16,22 @@ namespace HS
         #endregion
 
         #region HexasphereRender
-
+        public Material provinceMaterial;
+        public Material provinceColoredMaterial;
         public float gradientIntensity;
         public Color tileTintColor;
         public Color ambientColor;
         public float minimumLight;
 
-        public Material provinceMaterial;
-        public Material provinceColoredMaterial;
+        public Material thinEdgesMaterial;
+        public Color thinEdgesColor;
+        [Range(0, 2f)]
+        public float thinEdgesColorIntensity;
+        
+        public Material thickEdgesMaterial;
+        public Color thickEdgesColor;
+        [Range(0, 2f)]
+        public float thickEdgesColorIntensity;
 
         public Material hoverProvinceHighlightMaterial;
         public Material currentProvinceHighlightMaterial;
@@ -102,14 +110,21 @@ namespace HS
             HexasphereData.HexasphereCollider = startup.mapCollider as SphereCollider;
 
             //Шейдеры
+            hexasphereData.provinceMaterial = provinceMaterial;
+            hexasphereData.provinceColoredMaterial = provinceColoredMaterial;
             hexasphereData.gradientIntensity = gradientIntensity;
             hexasphereData.tileTintColor = tileTintColor;
             hexasphereData.ambientColor = ambientColor;
             hexasphereData.minimumLight = minimumLight;
 
-            hexasphereData.provinceMaterial = provinceMaterial;
-            hexasphereData.provinceColoredMaterial = provinceColoredMaterial;
+            hexasphereData.thinEdgesMaterial = thinEdgesMaterial;
+            hexasphereData.thinEdgesColor = thinEdgesColor;
+            hexasphereData.thinEdgesColorIntensity = thinEdgesColorIntensity;
 
+            hexasphereData.thickEdgesMaterial = thickEdgesMaterial;
+            hexasphereData.thickEdgesColor = thickEdgesColor;
+            hexasphereData.thickEdgesColorIntensity = thickEdgesColorIntensity;
+            
             hexasphereData.hoverProvinceHighlightMaterial = hoverProvinceHighlightMaterial;
             hexasphereData.hoverProvinceHighlightMaterial.shaderKeywords = null;//= new string[] { ShaderParameters.SKW_HIGHLIGHT_TINT_BACKGROUND };
             hexasphereData.hoverProvinceHighlightMaterial.SetFloat(ShaderParameters.ColorShift, 1f);

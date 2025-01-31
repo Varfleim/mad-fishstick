@@ -13,10 +13,10 @@ namespace MF.Map
         readonly EcsPoolInject<CActiveMapMode> activeMapModePool = default;
 
 
-        readonly EcsPoolInject<RMapRenderUpdate> mapRenderUpdateRequestPool = default;
+        readonly EcsPoolInject<RMapProvincesUpdate> mapProvincesUpdateRPool = default;
 
-        readonly EcsFilterInject<Inc<CMapModeCore, SRMapModeUpdate>> mapModeUpdateSelfRequestFilter = default;
-        readonly EcsPoolInject<SRMapModeUpdate> mapModeUpdateSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<CMapModeCore, SRMapModeUpdate>> mapModeUpdateSRFilter = default;
+        readonly EcsPoolInject<SRMapModeUpdate> mapModeUpdateSRPool = default;
 
         public void Run(IEcsSystems systems)
         {
@@ -25,15 +25,15 @@ namespace MF.Map
 
         }
 
-        readonly EcsFilterInject<Inc<RMapModeActivation>> mapModeActivationRequestFilter = default;
-        readonly EcsPoolInject<RMapModeActivation> mapModeActivationRequestPool = default;
+        readonly EcsFilterInject<Inc<RMapModeActivation>> mapModeActivationRFilter = default;
+        readonly EcsPoolInject<RMapModeActivation> mapModeActivationRPool = default;
         void MapModesActivation()
         {
             //Для каждого запроса активации режима карты
-            foreach(int requestEntity in mapModeActivationRequestFilter.Value)
+            foreach(int requestEntity in mapModeActivationRFilter.Value)
             {
                 //Берём запрос
-                ref RMapModeActivation requestComp = ref mapModeActivationRequestPool.Value.Get(requestEntity);
+                ref RMapModeActivation requestComp = ref mapModeActivationRPool.Value.Get(requestEntity);
 
                 //Деактивируем активный режим карты
                 bool isMapModeDeactivated = MapModeDeactivationCheck(ref requestComp);
@@ -46,7 +46,7 @@ namespace MF.Map
                 }
 
                 //Удаляем запрос
-                mapModeActivationRequestPool.Value.Del(requestEntity);
+                mapModeActivationRPool.Value.Del(requestEntity);
             }
         }
 
@@ -65,13 +65,13 @@ namespace MF.Map
 
             //Запрашиваем обновление режима карты
             MapModeData.MapModeUpdateRequest(
-                mapModeUpdateSelfRequestPool.Value,
+                mapModeUpdateSRPool.Value,
                 mapModeEntity);
 
-            //Запрашиваем обновление материалов карты
-            MapData.MapRenderUpdateRequest(
+            //Запрашиваем обновление провинций карты
+            MapData.MapProvincesUpdateRequest(
                 world.Value,
-                mapRenderUpdateRequestPool.Value,
+                mapProvincesUpdateRPool.Value,
                 true, false, false);
         }
 
@@ -111,10 +111,10 @@ namespace MF.Map
         void MapModeUpdatesCancel()
         {
             //Для каждого запроса обновления режима карты
-            foreach(int mapModeEntity in mapModeUpdateSelfRequestFilter.Value)
+            foreach(int mapModeEntity in mapModeUpdateSRFilter.Value)
             {
                 //Удаляем запрос
-                mapModeUpdateSelfRequestPool.Value.Del(mapModeEntity);
+                mapModeUpdateSRPool.Value.Del(mapModeEntity);
             }
         }
     }

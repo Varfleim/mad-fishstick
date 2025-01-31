@@ -27,7 +27,7 @@ namespace SO.Region
             }
         }
 
-        readonly EcsPoolInject<SRSetMapRenderValues> setMapRenderValuesSelfRequestsPool = default;
+        readonly EcsPoolInject<SRUpdateProvinceRender> setMapRenderValuesSRPool = default;
         void SetMapRenderValuesRequests(
             ref CMapRegions mapR)
         {
@@ -37,9 +37,9 @@ namespace SO.Region
                 //Берём сущность региона
                 mapR.regionPEs[a].Unpack(world.Value, out int regionEntity);
 
-                //Создаём запрос изменения визуализации для неё
-                MF.Map.MapModeData.SetMapRenderValuesRequestCreation(
-                    setMapRenderValuesSelfRequestsPool.Value,
+                //Создаём запрос обновления визуализации провинций для неё
+                MF.Map.MapModeData.UpdateProvinceRenderRequestCreation(
+                    setMapRenderValuesSRPool.Value,
                     regionEntity);
             }
         }
