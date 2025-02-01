@@ -53,7 +53,7 @@ namespace SO.LandOwnership
                     //Создаём запрос изменения визуализации для неё
                     MF.Map.MapModeData.UpdateProvinceRenderRequestFull(
                         updateProvinceRenderSRPool.Value,
-                        ref mapMode,
+                        //ref mapMode,
                         landEntity,
                         requestComp.displayedObjectPE,
                         requestComp.height,

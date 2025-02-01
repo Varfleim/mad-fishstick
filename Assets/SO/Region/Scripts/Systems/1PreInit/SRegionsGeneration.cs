@@ -39,16 +39,16 @@ namespace SO.Region
             RegionsColorListsUpdate();
         }
 
-        readonly EcsFilterInject<Inc<SRRegionsGeneration>> mapRegionsGenerationSelfRequestFilter = default;
-        readonly EcsPoolInject<SRRegionsGeneration> regionsGenerationSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRRegionsGeneration>> mapRegionsGenerationSRFilter = default;
+        readonly EcsPoolInject<SRRegionsGeneration> regionsGenerationSRPool = default;
         void RegionsGeneration()
         {
             //Для каждой карты с запросом генерации регионов
-            foreach (int mapEntity in mapRegionsGenerationSelfRequestFilter.Value)
+            foreach (int mapEntity in mapRegionsGenerationSRFilter.Value)
             {
                 //Берём карту и запрос
                 ref CMap map = ref mapPool.Value.Get(mapEntity);
-                ref SRRegionsGeneration requestComp = ref regionsGenerationSelfRequestPool.Value.Get(mapEntity);
+                ref SRRegionsGeneration requestComp = ref regionsGenerationSRPool.Value.Get(mapEntity);
 
                 //Назначаем карте компонент для сохранения информации о регионах
                 MapRegionsComponentCreation(mapEntity);
@@ -71,11 +71,15 @@ namespace SO.Region
                 RegionsExpansion(
                     ref map);
 
+                //Определяем соседей регионов
+                RegionsSetNeighbours(
+                    ref mapR);
+
                 //Переносим данные из временных компонентов в основные
                 RegionsSaveTempData();
 
                 //Удаляем запрос
-                regionsGenerationSelfRequestPool.Value.Del(mapEntity);
+                regionsGenerationSRPool.Value.Del(mapEntity);
             }
         }
 
@@ -126,13 +130,13 @@ namespace SO.Region
             ref CRegionCore rC)
         {
             //Создаём случайный цвет
-            Color regionColor = new Color(Random.value, Random.value, Random.value);
+            Color regionColor = new(Random.value, Random.value, Random.value);
 
             //Пока данный цвет существует в словаре цветов
             while(mapModeData.Value.regionMapModeUniqueColors.TryGetValue(regionColor, out EcsPackedEntity oldRegionPE) == true)
             {
                 //Создаём случайный цвет
-                regionColor = new Color(Random.value, Random.value, Random.value);
+                regionColor = new(Random.value, Random.value, Random.value);
             }
 
             //Заносим его в словарь
@@ -400,7 +404,7 @@ namespace SO.Region
                     }
 
                     //Берём сущность следующего соседа
-                    int nextNeighbourProvinceEntity = -1;
+                    int nextNeighbourProvinceEntity;
 
                     //Если текущий сосед - не последний в массиве
                     if (a < pC.neighbourProvincePEs.Length - 1)
@@ -556,10 +560,10 @@ namespace SO.Region
             ref CRegionCore rC, ref CTRegionGeneration rG)
         {
             //Для каждой внешней провинции региона в обратном порядке
-            for (int a = rG.outerProvinceWithFreeNeighboursPEs.Count - 1; a >= 0; a--)
+            for (int a = rG.outerProvinceWithoutFreeNeighboursPEs.Count - 1; a >= 0; a--)
             {
                 //Берём сущость провинции
-                rG.outerProvinceWithFreeNeighboursPEs[a].Unpack(world.Value, out int provinceEntity);
+                rG.outerProvinceWithoutFreeNeighboursPEs[a].Unpack(world.Value, out int provinceEntity);
 
                 //Если провинция не имеет свободных соседей, то она может оказаться внутренней
                 if (withoutFreeNeighboursPool.Value.Has(provinceEntity) == true)
@@ -594,7 +598,47 @@ namespace SO.Region
                         rG.innerProvincePEs.Add(pC.selfPE);
 
                         //Удаляем провинцию из списка внешних
-                        rG.outerProvinceWithFreeNeighboursPEs.RemoveAt(a);
+                        rG.outerProvinceWithoutFreeNeighboursPEs.RemoveAt(a);
+                    }
+                }
+            }
+        }
+
+        void RegionsSetNeighbours(
+            ref CMapRegions mapR)
+        {
+            //Для каждого региона карты
+            for(int a = 0; a < mapR.regionPEs.Length; a++)
+            {
+                //Берём регион
+                mapR.regionPEs[a].Unpack(world.Value, out int regionEntity);
+                ref CRegionCore rC = ref rCPool.Value.Get(regionEntity);
+                ref CTRegionGeneration rG = ref rGPool.Value.Get(regionEntity);
+
+                //Для каждой внешней провинции региона без свободных соседей
+                for (int b = 0; b < rG.outerProvinceWithoutFreeNeighboursPEs.Count; b++)
+                {
+                    //Берём провинцию
+                    rG.outerProvinceWithoutFreeNeighboursPEs[b].Unpack(world.Value, out int provinceEntity);
+                    ref CProvinceCore pC = ref pCPool.Value.Get(provinceEntity);
+                    ref CTProvinceRegionNeighbours pRN = ref pRNPool.Value.Get(provinceEntity);
+
+                    //Для каждой соседней провинции
+                    for(int c = 0; c < pC.neighbourProvincePEs.Length; c++)
+                    {
+                        //Берём соседнюю провинцию
+                        pC.neighbourProvincePEs[c].Unpack(world.Value, out int neighbourProvinceEntity);
+                        ref CTProvinceRegionOwner neighbourPRO = ref pROPool.Value.Get(neighbourProvinceEntity);
+
+                        //Если она принадлежит другому региону
+                        if(neighbourPRO.parentRegionPE.EqualsTo(rC.selfPE) == false)
+                        {
+                            //Заносим её родительский регион в список соседних регионов текущего региона
+                            rG.tempNeighbourRegionPEs.Add(neighbourPRO.parentRegionPE);
+
+                            //Заносим её PE в список соседних провинций текущего региона
+                            rG.tempNeighbourProvincePEs.Add(pC.neighbourProvincePEs[c]);
+                        }
                     }
                 }
             }
@@ -636,13 +680,19 @@ namespace SO.Region
 
                 //Переносим временные данные в основные
                 rC.provincePEs = rG.GetAllProvinces().ToArray();
+                rC.firstOuterProvinceIndex = rG.innerProvincePEs.Count;
+
+                rC.neighbourRegionPEs = new EcsPackedEntity[rG.tempNeighbourRegionPEs.Count];
+                rG.tempNeighbourRegionPEs.CopyTo(rC.neighbourRegionPEs);
+                rC.neighbourProvincePEs = new EcsPackedEntity[rG.tempNeighbourProvincePEs.Count];
+                rG.tempNeighbourProvincePEs.CopyTo(rC.neighbourProvincePEs);
 
                 //Удаляем компонент с сущности
                 rGPool.Value.Del(regionEntity);
             }
         }
 
-        readonly EcsPoolInject<RMapModeUpdateColorsListSecond> mapModeUpdateColorsListSecondRequestPool = default;
+        readonly EcsPoolInject<RMapModeUpdateColorsListSecond> mapModeUpdateColorsListSecondRPool = default;
         void RegionsColorListsUpdate()
         {
             //Если количество цветов в словаре больше количества цветов в списке
@@ -670,7 +720,7 @@ namespace SO.Region
                 //Запрашиваем вторичное обновление списка цветов карты
                 MF.Map.MapModeData.MapModeUpdateColorsListSecondRequest(
                     world.Value,
-                    mapModeUpdateColorsListSecondRequestPool.Value,
+                    mapModeUpdateColorsListSecondRPool.Value,
                     mapModeData.Value.regionMapModePE,
                     mapModeData.Value.regionMapModeColors, mapModeData.Value.regionMapModeDefaultColor);
             }

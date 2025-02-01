@@ -7,7 +7,7 @@ using SO.LandOwnership;
 
 namespace SO.MapMode
 {
-    public class SPoliticalMapModeRender : IEcsRunSystem
+    public class SPoliticalMapModePreThreads : IEcsRunSystem
     {
         readonly EcsFilterInject<Inc<CAgentLandOwner>> aLandOwnerFilter = default;
 

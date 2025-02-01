@@ -15,6 +15,9 @@ namespace SO.Region
             outerProvinceWithoutFreeNeighboursPEs = new();
 
             provinceWithoutFreeNeighboursCount = 0;
+
+            tempNeighbourRegionPEs = new();
+            tempNeighbourProvincePEs = new();
         }
 
         public List<EcsPackedEntity> innerProvincePEs;
@@ -41,5 +44,8 @@ namespace SO.Region
 
             return allProvincePEs;
         }
+
+        public HashSet<EcsPackedEntity> tempNeighbourRegionPEs;
+        public HashSet<EcsPackedEntity> tempNeighbourProvincePEs;
     }
 }

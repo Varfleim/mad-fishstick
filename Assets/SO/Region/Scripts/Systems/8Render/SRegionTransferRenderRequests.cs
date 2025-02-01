@@ -85,7 +85,7 @@ namespace SO.Region
                     //Создаём запрос обновления визуализации для неё
                     MF.Map.MapModeData.UpdateProvinceRenderRequestFull(
                         updateProvinceRenderValuesSRPool.Value,
-                        ref mapMode,
+                        //ref mapMode,
                         provinceEntity,
                         requestComp.displayedObjectPE,
                         requestComp.height,

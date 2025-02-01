@@ -48,6 +48,12 @@ namespace SO.Region
 
         public override void InjectData(MFStartup startup)
         {
+            //Создаём компонент данных регионов
+            RegionData regionData = startup.AddDataObject().AddComponent<RegionData>();
+
+            //Вводим данные
+            startup.InjectData(regionData);
+
             //Создаём компонент данных режимов карты
             MapModeData mapModeData = startup.AddDataObject().AddComponent<MapModeData>();
 

@@ -27,6 +27,9 @@ namespace SO.Initialization
             startup.AddPreInitSystem(new SAgentInitialization());
             #endregion
             #region Init
+            //Инициализация поиска пути
+            startup.AddInitSystem(new SPathfindingInitialization());
+
             //Первый этап инициализации регионов
             startup.AddInitSystem(new SRegionInitializationFirst());
             //Второй этап инициализации регионов

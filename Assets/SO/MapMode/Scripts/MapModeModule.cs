@@ -35,15 +35,16 @@ namespace SO.MapMode
 
             //Добавляем системы рендеринга
             #region PreRender
+            //Обновление списков цветов режимов карты при обновлении списков цветов объектов
+            startup.AddPreRenderSystem(new SMapModesUpdateColors());
+
             //Политический режим карты
             startup.AddPreRenderSystemGroup(
                 politicalMapModeName,
                 false,
-                new SPoliticalMapModeRender(),
-                new SMTPoliticalMapModeRender());
-
-            //Обновление списков цветов режимов карты при обновлении списков цветов объектов
-            startup.AddPreRenderSystem(new SMapModesUpdateColors());
+                new SPoliticalMapModePreThreads(),
+                new SMTPoliticalMapModeThreads(),
+                new SPoliticalMapModePostThreads());
             #endregion
         }
 

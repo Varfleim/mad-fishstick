@@ -100,6 +100,10 @@ namespace GS.Agent
             agentData.Value.agentColors.Clear();
             agentData.Value.agentColorPEs.Clear();
 
+            //Заносим в списки цвет отсутствия агента
+            agentData.Value.agentColors.Add(Color.white);
+            agentData.Value.agentColorPEs.Add(new());
+
             //Для каждой записи в словаре
             foreach(KeyValuePair<Color, EcsPackedEntity> kVP in agentData.Value.agentUniqueColors)
             {

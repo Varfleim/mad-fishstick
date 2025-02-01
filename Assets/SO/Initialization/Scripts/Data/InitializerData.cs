@@ -17,7 +17,7 @@ namespace SO.Initialization
             EcsWorld world,
             EcsPool<RRegionInitializationFirst> requestPool,
             EcsPackedEntity parentMapPE,
-            EcsPackedEntity ownerAgentPE)
+            EcsPackedEntity ownerAgentPE = new())
         {
             //Создаём новую сущность и назначаем ей запрос
             int requestEntity = world.NewEntity();
@@ -32,21 +32,22 @@ namespace SO.Initialization
         public static void RegionInitializationSecondRequest(
             EcsPool<SRRegionInitializationSecond> requestPool,
             int regionEntity,
-            ref RRegionInitializationFirst oldRequestComp)
+            ref RRegionInitializationFirst oldRequestComp,
+            EcsPackedEntity ownerAgentPE = new())
         {
             //Назначаем сущности региона запрос
             ref SRRegionInitializationSecond requestComp = ref requestPool.Add(regionEntity);
 
             //Заполняем данные запроса
             requestComp = new(
-                oldRequestComp.ownerAgentPE);
+                ownerAgentPE);
         }
 
         public static void IslandInitializationFirstRequest(
             EcsWorld world,
             EcsPool<RIslandInitializationFirst> requestPool,
             EcsPackedEntity parentRegionPE,
-            EcsPackedEntity ownerAgentPE)
+            EcsPackedEntity ownerAgentPE = new())
         {
             //Создаём новую сущность и назначаем ей запрос
             int requestEntity = world.NewEntity();

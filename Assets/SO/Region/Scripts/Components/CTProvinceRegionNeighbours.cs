@@ -1,4 +1,6 @@
 
+using System.Collections.Generic;
+
 using Leopotam.EcsLite;
 
 namespace SO.Region
@@ -9,15 +11,11 @@ namespace SO.Region
             EcsPackedEntity selfPE)
         {
             this.selfPE = selfPE;
-            
-            //parentRegionPE = new();
 
             ownedNeighboursCount = 0;
         }
 
         public readonly EcsPackedEntity selfPE;
-
-        //public EcsPackedEntity parentRegionPE;
 
         public int ownedNeighboursCount;
     }

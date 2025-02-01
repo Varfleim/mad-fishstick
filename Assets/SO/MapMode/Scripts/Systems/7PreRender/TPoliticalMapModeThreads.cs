@@ -8,7 +8,7 @@ using SO.LandOwnership;
 
 namespace SO.MapMode
 {
-    public struct TPoliticalMapModeRender : IEcsThread<
+    public struct TPoliticalMapModeThreads : IEcsThread<
         CAgent, CAgentLandOwner, SRUpdateProvinceRender,
         CMapModeCore>
     {

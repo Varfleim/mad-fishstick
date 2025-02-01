@@ -16,6 +16,10 @@ namespace SO.Region
             colorIndex = -1;
 
             provincePEs = new EcsPackedEntity[0];
+            firstOuterProvinceIndex = 0;
+
+            neighbourRegionPEs = new EcsPackedEntity[0];
+            neighbourProvincePEs = new EcsPackedEntity[0];
         }
 
         public readonly EcsPackedEntity selfPE;
@@ -38,6 +42,7 @@ namespace SO.Region
         }
 
         public EcsPackedEntity[] provincePEs;
+        public int firstOuterProvinceIndex;
 
         public EcsPackedEntity GetProvince(
             int provinceIndex)
@@ -53,5 +58,8 @@ namespace SO.Region
         {
             return GetProvince(UnityEngine.Random.Range(0, provincePEs.Length));
         }
+
+        public EcsPackedEntity[] neighbourRegionPEs;
+        public EcsPackedEntity[] neighbourProvincePEs;
     }
 }

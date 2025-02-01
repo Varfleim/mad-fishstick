@@ -112,7 +112,7 @@ namespace MF.Map
 
         public static void UpdateProvinceRenderRequestFull(
            EcsPool<SRUpdateProvinceRender> requestPool,
-           ref CMapModeCore mapMode,
+           //ref CMapModeCore mapMode,
            int targetEntity,
            EcsPackedEntity displayedObjectPE,
            float height,

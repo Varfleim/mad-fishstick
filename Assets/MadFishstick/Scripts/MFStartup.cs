@@ -114,11 +114,11 @@ namespace MF
             {
                 if (runtimeData.isGameActive == true)
                 {
-                    Debug.Log("Stage 1 " + System.DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss:fff"));
+                    Debug.Log("Tick Start " + System.DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss:fff"));
                     preTickSystems?.Run();
                     tickSystems?.Run();
                     postTickSystems?.Run();
-                    Debug.Log("Stage 2 " + System.DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss:fff"));
+                    Debug.Log("Tick End " + System.DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss:fff"));
                 }
             };
         }
