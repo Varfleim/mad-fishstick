@@ -4,7 +4,7 @@ using Leopotam.EcsLite.Di;
 
 namespace SO.LandOwnership
 {
-    public class SLandChangeOwner : IEcsInitSystem
+    public class SLandChangeOwner : IEcsInitSystem, IEcsRunSystem
     {
         readonly EcsWorldInject world = default;
 
@@ -16,24 +16,30 @@ namespace SO.LandOwnership
         public void Init(IEcsSystems systems)
         {
             //Изменяем владельцев земли
-            LandChangeOwners();
+            LandsChangeOwner();
+        }
+        
+        public void Run(IEcsSystems systems)
+        {
+            //Изменяем владельцев земли
+            LandsChangeOwner();
         }
 
-        readonly EcsFilterInject<Inc<RLandChangeOwner>> landChangeOwnerRequestFilter = default;
-        readonly EcsPoolInject<RLandChangeOwner> landChangeOwnerRequestPool = default;
-        void LandChangeOwners()
+        readonly EcsFilterInject<Inc<RLandChangeOwner>> landChangeOwnerRFilter = default;
+        readonly EcsPoolInject<RLandChangeOwner> landChangeOwnerRPool = default;
+        void LandsChangeOwner()
         {
             //Для каждого запроса изменения владельца земли
-            foreach(int requestEntity in landChangeOwnerRequestFilter.Value)
+            foreach(int requestEntity in landChangeOwnerRFilter.Value)
             {
                 //Берём запрос
-                ref RLandChangeOwner requestComp = ref landChangeOwnerRequestPool.Value.Get(requestEntity);
+                ref RLandChangeOwner requestComp = ref landChangeOwnerRPool.Value.Get(requestEntity);
 
                 //Изменяем владельца земли
                 LandChangeOwner(ref requestComp);
 
                 //Удаляем запрос
-                landChangeOwnerRequestPool.Value.Del(requestEntity);
+                landChangeOwnerRPool.Value.Del(requestEntity);
             }
         }
 
@@ -53,7 +59,7 @@ namespace SO.LandOwnership
                 LandOwnerRemoveLand(ref landOwned);
 
                 //Если PE нового владельца не пуста
-                if (requestComp.newOwnerPE.Unpack(world.Value, out int landOwnerEntity))
+                if (requestComp.newOwnerPE.Unpack(world.Value, out int aLandOwnerEntity))
                 {
                     //Заносим землю в список владельца
                     LandOwnerAddLand(
@@ -71,7 +77,7 @@ namespace SO.LandOwnership
             else
             {
                 //Если PE нового владельца не пуста
-                if (requestComp.newOwnerPE.Unpack(world.Value, out int landOwnerEntity))
+                if (requestComp.newOwnerPE.Unpack(world.Value, out int aLandOwnerEntity))
                 {
                     //Назначаем земле компонент владения
                     ref CLandOwned landOwned = ref landOwnedPool.Value.Add(landEntity);

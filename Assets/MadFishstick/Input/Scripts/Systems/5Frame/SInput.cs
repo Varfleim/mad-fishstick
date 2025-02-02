@@ -9,7 +9,12 @@ namespace MF.Input
         readonly EcsWorldInject world = default;
 
 
-        readonly EcsPoolInject<RMouseMapPositionCheck> mouseMapPositionCheckRequestPool = default;
+        readonly EcsFilterInject<Inc<RMousePositionChange>> mousePositionChangeRFilter = default;
+        readonly EcsPoolInject<RMousePositionChange> mousePositionChangeRPool = default;
+
+        readonly EcsPoolInject<RMouseMapPositionCheck> mouseMapPositionCheckRPool = default;
+
+        readonly EcsPoolInject<RMouseMapClickCheck> mouseMapClickCheckRPool = default;
 
 
         readonly EcsCustomInject<InputData> inputData = default;
@@ -20,15 +25,13 @@ namespace MF.Input
             MousePositionChangeRequests();
         }
 
-        readonly EcsFilterInject<Inc<RMousePositionChange>> mousePositionChangeRequestFilter = default;
-        readonly EcsPoolInject<RMousePositionChange> mousePositionChangeRequestPool = default;
         void MousePositionChangeRequests()
         {
             //Для каждого запроса изменения положения курсора
-            foreach(int requestEntity in mousePositionChangeRequestFilter.Value)
+            foreach(int requestEntity in mousePositionChangeRFilter.Value)
             {
                 //Берём запрос
-                ref RMousePositionChange requestComp = ref mousePositionChangeRequestPool.Value.Get(requestEntity);
+                ref RMousePositionChange requestComp = ref mousePositionChangeRPool.Value.Get(requestEntity);
 
                 //Обновляем положение курсора мыши
                 MousePositionChangeRequest(ref requestComp);
@@ -39,12 +42,24 @@ namespace MF.Input
                     //Запрашиваем проверку положения курсора на карте
                     InputData.MouseMapPositionCheckRequest(
                         world.Value,
-                        mouseMapPositionCheckRequestPool.Value,
+                        mouseMapPositionCheckRPool.Value,
                         inputData.Value.lastHitProvincePE);
+
+                    //Если клик левой или правой кнопкой мыши
+                    if(inputData.Value.leftMouseButtonClick == true
+                        || inputData.Value.rightMouseButtonClick == true)
+                    {
+                        //Запрашиваем проверку клика на карте
+                        InputData.MouseMapClickCheckRequest(
+                            world.Value,
+                            mouseMapClickCheckRPool.Value,
+                            inputData.Value.lastHitProvincePE,
+                            inputData.Value.leftMouseButtonClick, inputData.Value.rightMouseButtonClick);
+                    }
                 }
 
                 //Удаляем запрос
-                mousePositionChangeRequestPool.Value.Del(requestEntity);
+                mousePositionChangeRPool.Value.Del(requestEntity);
             }
         }
 

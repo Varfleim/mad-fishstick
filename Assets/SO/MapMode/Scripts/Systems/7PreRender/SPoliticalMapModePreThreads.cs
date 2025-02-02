@@ -9,9 +9,15 @@ namespace SO.MapMode
 {
     public class SPoliticalMapModePreThreads : IEcsRunSystem
     {
+        readonly EcsWorldInject world = default;
+
+
         readonly EcsFilterInject<Inc<CAgentLandOwner>> aLandOwnerFilter = default;
 
         readonly EcsPoolInject<SRUpdateProvinceRender> setMapRenderValuesSelfRequestsPool = default;
+
+
+        readonly EcsCustomInject<MapModeData> mapModeData = default;
 
         public void Run(IEcsSystems systems)
         {
@@ -22,6 +28,9 @@ namespace SO.MapMode
                 MF.Map.MapModeData.UpdateProvinceRenderRequestCreation(
                     setMapRenderValuesSelfRequestsPool.Value,
                     aLandOwnerEntity);
+
+                //Сохраняем PE агента
+                mapModeData.Value.lastAgentPE = world.Value.PackEntity(aLandOwnerEntity);
             }
         }
     }

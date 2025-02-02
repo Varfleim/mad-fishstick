@@ -66,31 +66,31 @@ namespace SO.Initialization
                 islandInitializationFirstRequestPool.Value,
                 world.Value.PackEntity(regionEntity),
                 requestComp.ownerAgentPE);
-            InitializerData.IslandInitializationFirstRequest(
-                world.Value,
-                islandInitializationFirstRequestPool.Value,
-                world.Value.PackEntity(regionEntity),
-                requestComp.ownerAgentPE);
-            InitializerData.IslandInitializationFirstRequest(
-                world.Value,
-                islandInitializationFirstRequestPool.Value,
-                world.Value.PackEntity(regionEntity),
-                requestComp.ownerAgentPE);
-            InitializerData.IslandInitializationFirstRequest(
-                world.Value,
-                islandInitializationFirstRequestPool.Value,
-                world.Value.PackEntity(regionEntity),
-                requestComp.ownerAgentPE);
-            InitializerData.IslandInitializationFirstRequest(
-                world.Value,
-                islandInitializationFirstRequestPool.Value,
-                world.Value.PackEntity(regionEntity),
-                requestComp.ownerAgentPE);
-            InitializerData.IslandInitializationFirstRequest(
-                world.Value,
-                islandInitializationFirstRequestPool.Value,
-                world.Value.PackEntity(regionEntity),
-                requestComp.ownerAgentPE);
+            //InitializerData.IslandInitializationFirstRequest(
+            //    world.Value,
+            //    islandInitializationFirstRequestPool.Value,
+            //    world.Value.PackEntity(regionEntity),
+            //    requestComp.ownerAgentPE);
+            //InitializerData.IslandInitializationFirstRequest(
+            //    world.Value,
+            //    islandInitializationFirstRequestPool.Value,
+            //    world.Value.PackEntity(regionEntity),
+            //    requestComp.ownerAgentPE);
+            //InitializerData.IslandInitializationFirstRequest(
+            //    world.Value,
+            //    islandInitializationFirstRequestPool.Value,
+            //    world.Value.PackEntity(regionEntity),
+            //    requestComp.ownerAgentPE);
+            //InitializerData.IslandInitializationFirstRequest(
+            //    world.Value,
+            //    islandInitializationFirstRequestPool.Value,
+            //    world.Value.PackEntity(regionEntity),
+            //    requestComp.ownerAgentPE);
+            //InitializerData.IslandInitializationFirstRequest(
+            //    world.Value,
+            //    islandInitializationFirstRequestPool.Value,
+            //    world.Value.PackEntity(regionEntity),
+            //    requestComp.ownerAgentPE);
         }
     }
 }

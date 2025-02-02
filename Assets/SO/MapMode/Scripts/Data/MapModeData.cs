@@ -10,5 +10,7 @@ namespace SO.MapMode
         public string politicalMapModeName;
         public EcsPackedEntity politicalMapModePE;
         public Color politicalMapModeDefaultColor;
+
+        public EcsPackedEntity lastAgentPE;
     }
 }

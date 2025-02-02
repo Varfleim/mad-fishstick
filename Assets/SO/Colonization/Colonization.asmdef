@@ -1,17 +1,12 @@
 {
-    "name": "MapMode",
-    "rootNamespace": "SO.MapMode",
+    "name": "Colonization",
+    "rootNamespace": "SO.Colonization",
     "references": [
         "GUID:e59bf9fc7d5a44b18a819a92edd46163",
         "GUID:f5f01a091e0d746659b4380253d52f4e",
         "GUID:a758ff47af0484038b71625d05877e22",
         "GUID:03de0458dc3246a46b826ed1491388cf",
-        "GUID:063cece380a2a4f45a05234fbbbac5ee",
         "GUID:a9349afd1373b984ea766f611e6e9758",
-        "GUID:2c5fe505abadcd04796e2ca28a48c23f",
-        "GUID:e9613afddff018a48a040f6d9d146588",
-        "GUID:255389950874c6c40b8109e4d75f462a",
-        "GUID:4f2c2642303686c47b88ba7bb8232ec7",
         "GUID:210f488ca494f5c40a43d1db6a46769d"
     ],
     "includePlatforms": [],

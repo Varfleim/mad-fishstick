@@ -51,7 +51,7 @@ namespace SO.LandOwnership
                     landPE.Unpack(world.Value, out int landEntity);
 
                     //Создаём запрос изменения визуализации для неё
-                    MF.Map.MapModeData.UpdateProvinceRenderRequestFull(
+                    MapModeData.UpdateProvinceRenderRequestFull(
                         updateProvinceRenderSRPool.Value,
                         //ref mapMode,
                         landEntity,
@@ -83,7 +83,7 @@ namespace SO.LandOwnership
                     landPE.Unpack(world.Value, out int landEntity);
 
                     //Создаём запрос подсветки наведения для неё
-                    MF.Map.MapModeData.ShowMapHoverHighlightRequest(
+                    MapModeData.ShowMapHoverHighlightRequest(
                         showMapHoverHighlightSRPool.Value,
                         ref mapMode,
                         landEntity);

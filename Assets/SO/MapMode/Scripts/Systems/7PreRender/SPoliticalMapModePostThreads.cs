@@ -5,13 +5,14 @@ using Leopotam.EcsLite.Di;
 using MF.Map;
 
 using SO.Island;
+using SO.Colonization;
 using SO.LandOwnership;
 
 namespace SO.MapMode
 {
     public class SPoliticalMapModePostThreads : IEcsRunSystem
     {
-        readonly EcsFilterInject<Inc<CIsland>, Exc<CLandOwned>> islandWithoutOwnerFilter = default;
+        readonly EcsFilterInject<Inc<CIsland>, Exc<CLandOwned, CLandColony>> islandWithoutOwnerFilter = default;
 
         readonly EcsPoolInject<SRUpdateProvinceRender> setMapRenderValuesSelfRequestsPool = default;
 

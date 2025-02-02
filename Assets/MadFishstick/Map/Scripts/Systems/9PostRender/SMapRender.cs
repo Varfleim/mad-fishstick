@@ -92,10 +92,14 @@ namespace MF.Map
                 //Берём провинцию
                 ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
 
-                //Обновляем индекс тонких граней провинции
-                isThinUpdated = MapModeData.UpdateProvinceThinEdgesIndex(
+                //Если индекс тонких граней был обновлён
+                if(MapModeData.UpdateProvinceThinEdgesIndex(
                     ref pR,
-                    -1);
+                    -1) == true)
+                {
+                    //Отмечаем, что грани обновлены
+                    isThinUpdated = true;
+                }
             }
 
             //Если нет провинций с запросом
@@ -112,10 +116,14 @@ namespace MF.Map
                 ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
                 ref SRUpdateThinEdges requestComp = ref updateThinEdgesSRPool.Value.Get(provinceEntity);
 
-                //Обновляем индекс тонких граней провинции
-                isThinUpdated = MapModeData.UpdateProvinceThinEdgesIndex(
+                //Если индекс тонких граней был обновлён
+                if (MapModeData.UpdateProvinceThinEdgesIndex(
                     ref pR,
-                    requestComp.edgeIndex);
+                    requestComp.edgeIndex) == true)
+                {
+                    //Отмечаем, что грани обновлены
+                    isThinUpdated = true;
+                }
 
                 //Удаляем запрос
                 updateThinEdgesSRPool.Value.Del(provinceEntity);
@@ -134,10 +142,14 @@ namespace MF.Map
                 //Берём провинцию
                 ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
 
-                //Обновляем индекс толстых граней провинции
-                isThickUpdated = MapModeData.UpdateProvinceThickEdgesIndex(
+                //Если индекс толстых граней был обновлён
+                if (MapModeData.UpdateProvinceThickEdgesIndex(
                     ref pR,
-                    -1);
+                    -1) == true)
+                {
+                    //Отмечаем, что грани обновлены
+                    isThickUpdated = true;
+                }
             }
 
             //Если нет провинций с запросом
@@ -154,10 +166,14 @@ namespace MF.Map
                 ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
                 ref SRUpdateThickEdges requestComp = ref updateThickEdgesSRPool.Value.Get(provinceEntity);
 
-                //Обновляем индекс толстых граней провинции
-                isThickUpdated = MapModeData.UpdateProvinceThickEdgesIndex(
+                //Если индекс толстых граней был обновлён
+                if (MapModeData.UpdateProvinceThickEdgesIndex(
                     ref pR,
-                    requestComp.edgeIndex);
+                    requestComp.edgeIndex) == true)
+                {
+                    //Отмечаем, что грани обновлены
+                    isThickUpdated = true;
+                }
 
                 //Удаляем запрос
                 updateThickEdgesSRPool.Value.Del(provinceEntity);
@@ -188,15 +204,25 @@ namespace MF.Map
                     new());
 
                 //Изменяем параметры визуализации провинции
-                isHeightUpdated = MapModeData.UpdateProvinceHeight(
+                //Если высота была обновлена
+                if(MapModeData.UpdateProvinceHeight(
                     ref mapMode,
                     ref pR,
-                    0.0f);
+                    0.0f) == true)
+                {
+                    //Отмечаем, что высота обновлена
+                    isHeightUpdated = true;
+                }
 
-                isColorUpdated = MapModeData.UpdateProvinceColorIndex(
+                //Если индекс цвета был обновлён
+                if(MapModeData.UpdateProvinceColorIndex(
                     ref mapMode,
                     ref pR,
-                    -1);
+                    -1) == true)
+                {
+                    //Отмечаем, что цвет обновлён
+                    isColorUpdated = true;
+                }
             }
 
             //Если нет провинций с запросом
@@ -221,15 +247,25 @@ namespace MF.Map
                     requestComp.displayedObjectPE);
 
                 //Изменяем параметры визуализации провинции
-                isHeightUpdated = MapModeData.UpdateProvinceHeight(
+                //Если высота была обновлена
+                if (MapModeData.UpdateProvinceHeight(
                     ref mapMode,
                     ref pR,
-                    requestComp.height);
+                    requestComp.height) == true)
+                {
+                    //Отмечаем, что высота обновлена
+                    isHeightUpdated = true;
+                }
 
-                isColorUpdated = MapModeData.UpdateProvinceColorIndex(
+                //Если индекс цвета был обновлён
+                if (MapModeData.UpdateProvinceColorIndex(
                     ref mapMode,
                     ref pR,
-                    requestComp.colorIndex);
+                    requestComp.colorIndex) == true)
+                {
+                    //Отмечаем, что цвет обновлён
+                    isColorUpdated = true;
+                }
 
                 //Удаляем запрос
                 updateProvinceRenderSRPool.Value.Del(provinceEntity);

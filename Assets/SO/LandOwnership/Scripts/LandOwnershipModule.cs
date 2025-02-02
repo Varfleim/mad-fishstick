@@ -21,6 +21,12 @@ namespace SO.LandOwnership
             //Перенос запросов визуализации с владельцев земли на землю
             startup.AddRenderSystem(new SLandOwnerTransferRenderRequests());
             #endregion
+
+            //Добавляем потиковые системы
+            #region Tick
+            //Смена владельцев земли
+            startup.AddTickSystem(new SLandChangeOwner());
+            #endregion
         }
 
         public override void InjectData(MFStartup startup)

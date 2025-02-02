@@ -32,6 +32,22 @@ namespace MF.Input
             requestComp = new(
                 currentProvincePE);
         }
+
+        public static void MouseMapClickCheckRequest(
+            EcsWorld world,
+            EcsPool<RMouseMapClickCheck> requestPool,
+            EcsPackedEntity currentProvincePE,
+            bool leftMouseButtonClick, bool rightMouseButtonClick)
+        {
+            //Создаём новую сущность и назначаем ей запрос
+            int requestEntity = world.NewEntity();
+            ref RMouseMapClickCheck requestComp = ref requestPool.Add(requestEntity);
+
+            //Заполняем данные запроса
+            requestComp = new(
+                currentProvincePE,
+                leftMouseButtonClick, rightMouseButtonClick);
+        }
         #endregion
 
         #region Keyboard
