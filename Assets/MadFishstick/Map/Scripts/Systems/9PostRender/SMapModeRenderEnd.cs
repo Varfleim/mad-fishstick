@@ -18,13 +18,13 @@ namespace MF.Map
             MapModesRenderSystemsDeactivation();
         }
 
-        readonly EcsFilterInject<Inc<CMapModeCore, SRMapModeUpdate>> mapModeUpdateSelfRequestFilter = default;
+        readonly EcsFilterInject<Inc<CMapModeCore, SRMapModeUpdate>> mapModeUpdateSRFilter = default;
         readonly EcsPoolInject<CMapModeCore> mapModeCorePool = default;
-        readonly EcsPoolInject<SRMapModeUpdate> mapModeUpdateSelfRequestPool = default;
+        readonly EcsPoolInject<SRMapModeUpdate> mapModeUpdateSRPool = default;
         void MapModesRenderSystemsDeactivation()
         {
             //Для каждого режима карты с запросом обновления
-            foreach (int mapModeEntity in mapModeUpdateSelfRequestFilter.Value)
+            foreach (int mapModeEntity in mapModeUpdateSRFilter.Value)
             {
                 //Берём режим карты
                 ref CMapModeCore mapMode = ref mapModeCorePool.Value.Get(mapModeEntity);
@@ -38,7 +38,7 @@ namespace MF.Map
                 requestComp.State = false;
 
                 //Удаляем запрос обновления режима карты
-                mapModeUpdateSelfRequestPool.Value.Del(mapModeEntity);
+                mapModeUpdateSRPool.Value.Del(mapModeEntity);
             }
         }
     }

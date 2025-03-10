@@ -6,8 +6,11 @@ namespace MF.Map
     [CreateAssetMenu]
     internal class MapModule : MFModule
     {
+        public float mapPanelAltitude;
+
         public GOProvince provinceGOPrefab;
         public GOProvinceHighlight provinceHighlightGOPrefab;
+        public UnityEngine.UI.VerticalLayoutGroup provinceMapPanelGroupPrefab;
 
         public override void AddSystems(MFStartup startup)
         {
@@ -73,11 +76,15 @@ namespace MF.Map
             //Создаём компонент данных провинций
             ProvinceData provinceData = startup.AddDataObject().AddComponent<ProvinceData>();
 
+            //Переносим в него данные
+            provinceData.mapPanelAltitude = mapPanelAltitude;
+
             //Вводим данные
             startup.InjectData(provinceData);
 
             GOProvince.provinceGOPrefab = provinceGOPrefab;
             GOProvinceHighlight.provinceHighlightPrefab = provinceHighlightGOPrefab;
+            CProvinceMapPanels.mapPanelGroupPrefab = provinceMapPanelGroupPrefab;
         }
     }
 }

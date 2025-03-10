@@ -9,6 +9,8 @@ namespace MF.Map
 {
     public class ProvinceData : MonoBehaviour
     {
+        public float mapPanelAltitude;
+
         public static void ProvinceCoreCreationRequest(
             EcsPool<SRProvinceCoreCreation> requestPool,
             int provinceEntity,
@@ -41,6 +43,22 @@ namespace MF.Map
 
             //Заносим провинцию в список
             mapProvincesList.Add(pC.selfPE);
+        }
+
+        public static void ProvinceMapPanelSetParentRequest(
+            EcsWorld world,
+            EcsPool<RProvinceMapPanelSetParent> requestPool,
+            EcsPackedEntity parentProvincePE,
+            GameObject mapPanelGO)
+        {
+            //Создаём новую сущность и назначаем ей запрос
+            int requestEntity = world.NewEntity();
+            ref RProvinceMapPanelSetParent requestComp = ref requestPool.Add(requestEntity);
+
+            //Заполняем данные запроса
+            requestComp = new(
+                parentProvincePE,
+                mapPanelGO);
         }
     }
 }

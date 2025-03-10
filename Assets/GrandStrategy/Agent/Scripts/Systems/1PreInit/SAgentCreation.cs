@@ -15,8 +15,8 @@ namespace GS.Agent
 
         readonly EcsPoolInject<CAgent> agentPool = default;
 
-        readonly EcsFilterInject<Inc<SRAgentCreation>> agentCreationSelfRequestFilter = default;
-        readonly EcsPoolInject<SRAgentCreation> agentCreationSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRAgentCreation>> agentCreationSRFilter = default;
+        readonly EcsPoolInject<SRAgentCreation> agentCreationSRPool = default;
 
 
         readonly EcsCustomInject<AgentData> agentData = default;
@@ -33,10 +33,10 @@ namespace GS.Agent
             bool isColorsUpdated = false;
 
             //Для каждого запроса создания агента
-            foreach (int agentRequestEntity in agentCreationSelfRequestFilter.Value)
+            foreach (int agentRequestEntity in agentCreationSRFilter.Value)
             {
                 //Берём запрос
-                ref SRAgentCreation requestComp = ref agentCreationSelfRequestPool.Value.Get(agentRequestEntity);
+                ref SRAgentCreation requestComp = ref agentCreationSRPool.Value.Get(agentRequestEntity);
 
                 //Создаём агента
                 AgentCreation(
@@ -50,7 +50,7 @@ namespace GS.Agent
                 ref CAgent agent = ref agentPool.Value.Get(agentRequestEntity);
 
                 //Удаляем запрос
-                agentCreationSelfRequestPool.Value.Del(agentRequestEntity);
+                agentCreationSRPool.Value.Del(agentRequestEntity);
             }
 
             //Если цвета обновлены
@@ -93,7 +93,7 @@ namespace GS.Agent
             agentData.Value.agentUniqueColors.Add(agentColor, agent.selfPE);
         }
 
-        readonly EcsPoolInject<MF.Map.RMapModeUpdateColorsListFirst> mapModeUpdateColorsListFirstRequestPool = default;
+        readonly EcsPoolInject<MF.Map.RMapModeUpdateColorsListFirst> mapModeUpdateColorsListFirstRPool = default;
         void AgentColorListsUpdate()
         {
             //Очищаем списки
@@ -122,7 +122,7 @@ namespace GS.Agent
             //Запрашиваем первичное обновление списка цветов режима карты
             MF.Map.MapModeData.MapModeUpdateColorsListFirstRequest(
                 world.Value,
-                mapModeUpdateColorsListFirstRequestPool.Value,
+                mapModeUpdateColorsListFirstRPool.Value,
                 AgentData.agentObjectType,
                 agentData.Value.agentColors);
         }

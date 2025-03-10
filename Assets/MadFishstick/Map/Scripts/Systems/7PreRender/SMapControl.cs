@@ -16,7 +16,7 @@ namespace MF.Map
         readonly EcsPoolInject<CProvinceRender> pRPool = default;
 
 
-        readonly EcsPoolInject<RMapRenderInitialization> mapRenderInitializationRequestPool = default;
+        readonly EcsPoolInject<RMapRenderInitialization> mapRenderInitializationRPool = default;
 
 
         readonly EcsCustomInject<MapModeData> mapModeData = default;
@@ -27,15 +27,15 @@ namespace MF.Map
             MapsActivation();
         }
 
-        readonly EcsFilterInject<Inc<RMapActivation>> mapActivationRequestFilter = default;
-        readonly EcsPoolInject<RMapActivation> mapActivationRequestPool = default;
+        readonly EcsFilterInject<Inc<RMapActivation>> mapActivationRFilter = default;
+        readonly EcsPoolInject<RMapActivation> mapActivationRPool = default;
         void MapsActivation()
         {
             //Для каждого запроса активации карты
-            foreach(int requestEntity in mapActivationRequestFilter.Value)
+            foreach(int requestEntity in mapActivationRFilter.Value)
             {
                 //Берём запрос
-                ref RMapActivation requestComp = ref mapActivationRequestPool.Value.Get(requestEntity);
+                ref RMapActivation requestComp = ref mapActivationRPool.Value.Get(requestEntity);
 
                 //Деактивируем активную карту
                 bool isMapDeactivated = MapDeactivationCheck(ref requestComp);
@@ -48,7 +48,7 @@ namespace MF.Map
                 }
 
                 //Удаляем запрос
-                mapActivationRequestPool.Value.Del(requestEntity);
+                mapActivationRPool.Value.Del(requestEntity);
             }
         }
 
@@ -76,7 +76,7 @@ namespace MF.Map
             //Запрашиваем инициализацию карты
             MapData.MapRenderInitializationRequest(
                 world.Value,
-                mapRenderInitializationRequestPool.Value);
+                mapRenderInitializationRPool.Value);
 
             //Запрашиваем активацию стандартного режима карты
             MapModeDefaultActivation();
@@ -121,13 +121,13 @@ namespace MF.Map
             return true;
         }
 
-        readonly EcsPoolInject<RMapModeActivation> mapModeActivationRequestPool = default;
+        readonly EcsPoolInject<RMapModeActivation> mapModeActivationRPool = default;
         void MapModeDefaultActivation()
         {
             //Запрашиваем активацию стандартного режима карты
             MapModeData.MapModeActivationRequest(
                 world.Value,
-                mapModeActivationRequestPool.Value,
+                mapModeActivationRPool.Value,
                 mapModeData.Value.defaultMapModePE);
         }
     }

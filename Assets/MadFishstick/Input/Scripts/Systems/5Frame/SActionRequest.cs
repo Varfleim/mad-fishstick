@@ -96,7 +96,7 @@ namespace MF.Input
             }
         }
 
-        readonly EcsPoolInject<RCameraMoving> cameraMovingRequestPool = default;
+        readonly EcsPoolInject<RCameraMoving> cameraMovingRPool = default;
         void CameraMovingRequest(
             bool isHorizontal, bool isVertical, bool isZoom,
             float value)
@@ -106,7 +106,7 @@ namespace MF.Input
             {
                 //Создаём новую сущность и назначаем ей запрос движения камеры
                 int requestEntity = world.Value.NewEntity();
-                ref RCameraMoving requestComp = ref cameraMovingRequestPool.Value.Add(requestEntity);
+                ref RCameraMoving requestComp = ref cameraMovingRPool.Value.Add(requestEntity);
 
                 //Заполняем данные запроса
                 requestComp = new RCameraMoving(

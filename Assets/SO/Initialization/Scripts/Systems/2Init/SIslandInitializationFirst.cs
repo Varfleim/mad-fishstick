@@ -13,10 +13,10 @@ namespace SO.Initialization
 
         readonly EcsPoolInject<CRegionCore> rCPool = default;
 
-        readonly EcsFilterInject<Inc<RIslandInitializationFirst>> islandInitializationFirstRequestFilter = default;
-        readonly EcsPoolInject<RIslandInitializationFirst> islandInitializationFirstRequestPool = default;
+        readonly EcsFilterInject<Inc<RIslandInitializationFirst>> islandInitializationFirstRFilter = default;
+        readonly EcsPoolInject<RIslandInitializationFirst> islandInitializationFirstRPool = default;
 
-        readonly EcsPoolInject<SRIslandInitializationSecond> islandInitializationSecondSelfRequestPool = default;
+        readonly EcsPoolInject<SRIslandInitializationSecond> islandInitializationSecondSRPool = default;
 
         public void Init(IEcsSystems systems)
         {
@@ -27,16 +27,16 @@ namespace SO.Initialization
         void IslandsInitializationLocation()
         {
             //Для каждого первичного инициализатора острова
-            foreach(int requestEntity in islandInitializationFirstRequestFilter.Value)
+            foreach(int requestEntity in islandInitializationFirstRFilter.Value)
             {
                 //Берём запрос
-                ref RIslandInitializationFirst requestComp = ref islandInitializationFirstRequestPool.Value.Get(requestEntity);
+                ref RIslandInitializationFirst requestComp = ref islandInitializationFirstRPool.Value.Get(requestEntity);
 
                 //Подбираем остров для инициализации
                 IslandInitializationLocation(ref requestComp);
 
                 //Удаляем запрос
-                islandInitializationFirstRequestPool.Value.Del(requestEntity);
+                islandInitializationFirstRPool.Value.Del(requestEntity);
             }
         }
 
@@ -48,7 +48,7 @@ namespace SO.Initialization
 
             //Запрашиваем вторичную инициализацию найденного острова
             InitializerData.IslandInitializationSecondRequest(
-                islandInitializationSecondSelfRequestPool.Value,
+                islandInitializationSecondSRPool.Value,
                 islandEntity,
                 ref requestComp);
         }
@@ -64,7 +64,7 @@ namespace SO.Initialization
             rC.GetProvinceRandom().Unpack(world.Value, out int provinceEntity);
 
             //Пока провинция имеет запрос вторичной инициализации
-            while(islandInitializationSecondSelfRequestPool.Value.Has(provinceEntity) == true)
+            while(islandInitializationSecondSRPool.Value.Has(provinceEntity) == true)
             {
                 //Берём сущность случайной провинции региона
                 rC.GetProvinceRandom().Unpack(world.Value, out provinceEntity);

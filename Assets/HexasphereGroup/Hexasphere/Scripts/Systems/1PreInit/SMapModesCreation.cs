@@ -9,9 +9,9 @@ namespace HS
         readonly EcsWorldInject world = default;
 
 
-        readonly EcsPoolInject<MF.Map.SRMapModeCreation> mapModeCreationSelfRequestPool = default;
+        readonly EcsPoolInject<MF.Map.SRMapModeCreation> mapModeCreationSRPool = default;
 
-        readonly EcsPoolInject<MF.Map.RMapModeUpdateColorsListSecond> mapModeUpdateColorsListSecondRequestPool = default;
+        readonly EcsPoolInject<MF.Map.RMapModeUpdateColorsListSecond> mapModeUpdateColorsListSecondRPool = default;
 
 
         readonly EcsCustomInject<MapModeData> mapModeData = default;
@@ -34,14 +34,14 @@ namespace HS
 
             //Запрашиваем назначение главного компонента режима карты
             MF.Map.MapModeData.MapModeCreationRequest(
-                mapModeCreationSelfRequestPool.Value,
+                mapModeCreationSRPool.Value,
                 mapModeEntity, mapModeData.Value.defaultMapModeName,
                 false);
 
             //Запрашиваем вторичное обновление списка цветов режима карты
             MF.Map.MapModeData.MapModeUpdateColorsListSecondRequest(
                 world.Value,
-                mapModeUpdateColorsListSecondRequestPool.Value,
+                mapModeUpdateColorsListSecondRPool.Value,
                 mapModeData.Value.defaultMapModePE,
                 mapModeData.Value.defaultMapModeColors, mapModeData.Value.defaultMapModeDefaultColor);
         }

@@ -11,10 +11,10 @@ namespace MF.Map
 
         readonly EcsPoolInject<CMap> mapPool = default;
 
-        readonly EcsFilterInject<Inc<SRMapCreation>> mapCreationSelfRequestFilter = default;
-        readonly EcsPoolInject<SRMapCreation> mapCreationSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRMapCreation>> mapCreationSRFilter = default;
+        readonly EcsPoolInject<SRMapCreation> mapCreationSRPool = default;
 
-        readonly EcsPoolInject<RMapActivation> mapActivationRequestPool = default;
+        readonly EcsPoolInject<RMapActivation> mapActivationRPool = default;
 
         public void Init(IEcsSystems systems)
         {
@@ -25,10 +25,10 @@ namespace MF.Map
         void MapsCreation()
         {
             //Для каждого запроса создания карты
-            foreach(int mapRequestEntity in mapCreationSelfRequestFilter.Value)
+            foreach(int mapRequestEntity in mapCreationSRFilter.Value)
             {
                 //Берём запрос
-                ref SRMapCreation requestComp = ref mapCreationSelfRequestPool.Value.Get(mapRequestEntity);
+                ref SRMapCreation requestComp = ref mapCreationSRPool.Value.Get(mapRequestEntity);
 
                 //Создаём карту
                 MapCreation(
@@ -43,12 +43,12 @@ namespace MF.Map
                     //Запрашиваем активацию карты
                     MapData.MapActivationRequest(
                         world.Value,
-                        mapActivationRequestPool.Value,
+                        mapActivationRPool.Value,
                         map.selfPE);
                 }
 
                 //Удаляем запрос
-                mapCreationSelfRequestPool.Value.Del(mapRequestEntity);
+                mapCreationSRPool.Value.Del(mapRequestEntity);
             }
         }
 

@@ -12,8 +12,8 @@ namespace SO.Initialization
         readonly EcsWorldInject world = default;
 
 
-        readonly EcsFilterInject<Inc<SRIslandInitializationSecond>> islandInitializationSecondSelfRequestFilter = default;
-        readonly EcsPoolInject<SRIslandInitializationSecond> islandInitializationSecondSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRIslandInitializationSecond>> islandInitializationSecondSRFilter = default;
+        readonly EcsPoolInject<SRIslandInitializationSecond> islandInitializationSecondSRPool = default;
 
         public void Init(IEcsSystems systems)
         {
@@ -24,10 +24,10 @@ namespace SO.Initialization
         void IslandsInitializationEffects()
         {
             //Для каждой провинции с вторичным инициализатором острова
-            foreach(int provinceRequestEntity in islandInitializationSecondSelfRequestFilter.Value)
+            foreach(int provinceRequestEntity in islandInitializationSecondSRFilter.Value)
             {
                 //Берём запрос
-                ref SRIslandInitializationSecond requestComp = ref islandInitializationSecondSelfRequestPool.Value.Get(provinceRequestEntity);
+                ref SRIslandInitializationSecond requestComp = ref islandInitializationSecondSRPool.Value.Get(provinceRequestEntity);
 
                 //Инициализируем остров
                 IslandInitializationEffects(
@@ -35,27 +35,27 @@ namespace SO.Initialization
                     provinceRequestEntity);
 
                 //Удаляем запрос
-                islandInitializationSecondSelfRequestPool.Value.Del(provinceRequestEntity);
+                islandInitializationSecondSRPool.Value.Del(provinceRequestEntity);
             }
         }
 
-        readonly EcsPoolInject<SRIslandCreation> islandCreationSelfRequestPool = default;
-        readonly EcsPoolInject<RLandChangeOwner> landChangeOwnerRequestPool = default;
+        readonly EcsPoolInject<SRIslandCreation> islandCreationSRPool = default;
+        readonly EcsPoolInject<RLandChangeOwner> landChangeOwnerRPool = default;
         void IslandInitializationEffects(
             ref SRIslandInitializationSecond requestComp,
             int provinceEntity)
         {
             //Назначаем сущности запрос создания острова
-            ref SRIslandCreation creationRequestComp = ref islandCreationSelfRequestPool.Value.Add(provinceEntity);
+            ref SRIslandCreation creationRequestComp = ref islandCreationSRPool.Value.Add(provinceEntity);
 
             //Заполняем данные запроса
             creationRequestComp = new(
-                "TestIsland");
+                "Test Island");
 
             //Запрашиваем изменение владельца земли (острова)
             LandOwnershipData.LandChangeOwnerRequest(
                 world.Value,
-                landChangeOwnerRequestPool.Value,
+                landChangeOwnerRPool.Value,
                 requestComp.ownerAgentPE,
                 world.Value.PackEntity(provinceEntity));
         }

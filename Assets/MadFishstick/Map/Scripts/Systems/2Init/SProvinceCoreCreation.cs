@@ -22,8 +22,8 @@ namespace MF.Map
             ProvincesCoreCreation();
         }
 
-        readonly EcsFilterInject<Inc<SRProvinceCoreCreation>> pCCreationSelfRequestFilter = default;
-        readonly EcsPoolInject<SRProvinceCoreCreation> pCCreationSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRProvinceCoreCreation>> pCCreationSRFilter = default;
+        readonly EcsPoolInject<SRProvinceCoreCreation> pCCreationSRPool = default;
         void ProvincesCoreCreation()
         {
             //Создаём временный список провинций
@@ -39,10 +39,10 @@ namespace MF.Map
                 tempProvinces.Clear();
 
                 //Для каждой провинции с запросом создания PC
-                foreach (int provinceEntity in pCCreationSelfRequestFilter.Value)
+                foreach (int provinceEntity in pCCreationSRFilter.Value)
                 {
                     //Берём запрос
-                    ref SRProvinceCoreCreation requestComp = ref pCCreationSelfRequestPool.Value.Get(provinceEntity);
+                    ref SRProvinceCoreCreation requestComp = ref pCCreationSRPool.Value.Get(provinceEntity);
 
                     //Если провинция принадлежит текущей карте
                     if(requestComp.parentMapPE.EqualsTo(map.selfPE))
@@ -59,7 +59,7 @@ namespace MF.Map
                         tempProvinces.Add(pC.selfPE);
 
                         //Удаляем запрос
-                        pCCreationSelfRequestPool.Value.Del(provinceEntity);
+                        pCCreationSRPool.Value.Del(provinceEntity);
                     }
                 }
 

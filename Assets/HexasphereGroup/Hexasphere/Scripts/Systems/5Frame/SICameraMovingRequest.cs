@@ -16,15 +16,15 @@ namespace HS
             CameraMovingRequestTransform();
         }
 
-        readonly EcsFilterInject<Inc<RCameraMoving>> cameraMovingRequestFilter = default;
-        readonly EcsPoolInject<RCameraMoving> cameraMovingRequestPool = default;
+        readonly EcsFilterInject<Inc<RCameraMoving>> cameraMovingRFilter = default;
+        readonly EcsPoolInject<RCameraMoving> cameraMovingRPool = default;
         void CameraMovingRequestTransform()
         {
             //Для каждого запроса движения камеры
-            foreach (int requestEntity in cameraMovingRequestFilter.Value)
+            foreach (int requestEntity in cameraMovingRFilter.Value)
             {
                 //Берём запрос
-                ref RCameraMoving requestComp = ref cameraMovingRequestPool.Value.Get(requestEntity);
+                ref RCameraMoving requestComp = ref cameraMovingRPool.Value.Get(requestEntity);
 
                 //Запрашиваем движения камеры гексасферы
                 HexasphereCameraMovingRequest(
@@ -32,18 +32,18 @@ namespace HS
                     requestComp.value);
 
                 //Удаляем запрос
-                cameraMovingRequestPool.Value.Del(requestEntity);
+                cameraMovingRPool.Value.Del(requestEntity);
             }
         }
 
-        readonly EcsPoolInject<RHexasphereCameraMoving> hexasphereCameraMovingRequestPool = default;
+        readonly EcsPoolInject<RHexasphereCameraMoving> hexasphereCameraMovingRPool = default;
         void HexasphereCameraMovingRequest(
             bool isHorizontal, bool isVertical, bool isZoom,
             float value)
         {
             //Создаём новую сущность и назначаем ей запрос движения камеры гексасферы
             int requestEntity = world.Value.NewEntity();
-            ref RHexasphereCameraMoving requestComp = ref hexasphereCameraMovingRequestPool.Value.Add(requestEntity);
+            ref RHexasphereCameraMoving requestComp = ref hexasphereCameraMovingRPool.Value.Add(requestEntity);
 
             //Заполняем данные запроса
             requestComp = new(

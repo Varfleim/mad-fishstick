@@ -171,9 +171,6 @@ namespace HS
         internal Color ambientColor;
         internal float minimumLight;
 
-
-        //internal int uvChunkCount;
-
         internal Texture2D bevelNormals;
         internal Color[] bevelNormalsColors;
 

@@ -14,10 +14,10 @@ namespace HS
         readonly EcsWorldInject world = default;
 
 
-        readonly EcsFilterInject<Inc<CProvinceHexasphere>, Exc<SRProvinceCoreCreation>> provinceWithoutPCCreationSelfRequestFilter = default;
+        readonly EcsFilterInject<Inc<CProvinceHexasphere>, Exc<SRProvinceCoreCreation>> provinceWithoutPCCreationSRFilter = default;
         readonly EcsPoolInject<CProvinceHexasphere> pHSPool = default;
-        readonly EcsFilterInject<Inc<SRProvinceCoreCreation>> pCCreationSelfRequestFilter = default;
-        readonly EcsPoolInject<SRProvinceCoreCreation> pCCreationSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRProvinceCoreCreation>> pCCreationSRFilter = default;
+        readonly EcsPoolInject<SRProvinceCoreCreation> pCCreationSRPool = default;
 
 
         readonly EcsCustomInject<HexasphereData> hexasphereData = default;
@@ -28,15 +28,15 @@ namespace HS
             HexasphereGeneration();
         }
 
-        readonly EcsFilterInject<Inc<SRHexasphereGeneration>> mapHexasphereGenerationSelfRequestFilter = default;
-        readonly EcsPoolInject<SRHexasphereGeneration> hexasphereGenerationSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRHexasphereGeneration>> mapHexasphereGenerationSRFilter = default;
+        readonly EcsPoolInject<SRHexasphereGeneration> hexasphereGenerationSRPool = default;
         void HexasphereGeneration()
         {
             //Для каждой карты с запросом генерации гексасферы
-            foreach (int mapEntity in mapHexasphereGenerationSelfRequestFilter.Value)
+            foreach (int mapEntity in mapHexasphereGenerationSRFilter.Value)
             {
                 //Берём запрос
-                ref SRHexasphereGeneration requestComp = ref hexasphereGenerationSelfRequestPool.Value.Get(mapEntity);
+                ref SRHexasphereGeneration requestComp = ref hexasphereGenerationSRPool.Value.Get(mapEntity);
 
                 //Инициализируем данные гексасферы
                 HexasphereInitialize();
@@ -52,7 +52,7 @@ namespace HS
                     mapEntity);
 
                 //Удаляем запрос
-                hexasphereGenerationSelfRequestPool.Value.Del(mapEntity);
+                hexasphereGenerationSRPool.Value.Del(mapEntity);
             }
         }
 
@@ -265,7 +265,7 @@ namespace HS
             List<EcsPackedEntity> tempNeighbours = ListPool<EcsPackedEntity>.Get();
 
             //Для каждой провинции без запроса создания PC
-            foreach (int provinceEntity in provinceWithoutPCCreationSelfRequestFilter.Value)
+            foreach (int provinceEntity in provinceWithoutPCCreationSRFilter.Value)
             {
                 //Берём PHS
                 ref CProvinceHexasphere pHS = ref pHSPool.Value.Get(provinceEntity);
@@ -347,7 +347,7 @@ namespace HS
 
                 //Запрашиваем создание PC по PHS
                 ProvinceData.ProvinceCoreCreationRequest(
-                    pCCreationSelfRequestPool.Value,
+                    pCCreationSRPool.Value,
                     provinceEntity,
                     hexasphereGenerationRequestComp.mapPE,
                     tempNeighbours);
@@ -369,10 +369,10 @@ namespace HS
             ref CMap map = ref mapPool.Value.Get(mapEntity);
 
             //Для каждой провинции с запросом создания PC
-            foreach(int provinceEntity in pCCreationSelfRequestFilter.Value)
+            foreach(int provinceEntity in pCCreationSRFilter.Value)
             {
                 //Берём запрос
-                ref SRProvinceCoreCreation requestComp = ref pCCreationSelfRequestPool.Value.Get(provinceEntity);
+                ref SRProvinceCoreCreation requestComp = ref pCCreationSRPool.Value.Get(provinceEntity);
 
                 //Создаём PC по запросу
                 ProvinceData.ProvinceCoreCreation(
@@ -383,7 +383,7 @@ namespace HS
                     tempProvinces);
 
                 //Удаляем запрос
-                pCCreationSelfRequestPool.Value.Del(provinceEntity);
+                pCCreationSRPool.Value.Del(provinceEntity);
             }
 
             //Сохраняем список как массив провинций карты

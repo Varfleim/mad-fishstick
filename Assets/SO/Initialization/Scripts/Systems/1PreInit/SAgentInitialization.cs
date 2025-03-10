@@ -16,15 +16,15 @@ namespace SO.Initialization
             AgentsInitialization();
         }
 
-        readonly EcsFilterInject<Inc<SRAgentInitialization>> agentInitializationSelfRequestFilter = default;
-        readonly EcsPoolInject<SRAgentInitialization> agentInitializationSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRAgentInitialization>> agentInitializationSRFilter = default;
+        readonly EcsPoolInject<SRAgentInitialization> agentInitializationSRPool = default;
         void AgentsInitialization()
         {
             //Для каждого запроса инициализации агента
-            foreach(int agentRequestEntity in agentInitializationSelfRequestFilter.Value)
+            foreach(int agentRequestEntity in agentInitializationSRFilter.Value)
             {
                 //Берём запрос
-                ref SRAgentInitialization requestComp = ref agentInitializationSelfRequestPool.Value.Get(agentRequestEntity);
+                ref SRAgentInitialization requestComp = ref agentInitializationSRPool.Value.Get(agentRequestEntity);
 
                 //Инициализируем агента
                 AgentInitialization(
@@ -32,18 +32,18 @@ namespace SO.Initialization
                     agentRequestEntity);
 
                 //Удаляем запрос
-                agentInitializationSelfRequestPool.Value.Del(agentRequestEntity);
+                agentInitializationSRPool.Value.Del(agentRequestEntity);
             }
         }
 
-        readonly EcsPoolInject<SRAgentCreation> agentCreationSelfRequestPool = default;
-        readonly EcsPoolInject<RRegionInitializationFirst> regionInitializationFirstRequestPool = default;
+        readonly EcsPoolInject<SRAgentCreation> agentCreationSRPool = default;
+        readonly EcsPoolInject<RRegionInitializationFirst> regionInitializationFirstRPool = default;
         void AgentInitialization(
             ref SRAgentInitialization requestComp,
             int agentEntity)
         {
             //Назначаем сущности запрос создания агента
-            ref SRAgentCreation creationRequestComp = ref agentCreationSelfRequestPool.Value.Add(agentEntity);
+            ref SRAgentCreation creationRequestComp = ref agentCreationSRPool.Value.Add(agentEntity);
 
             //Заполняем данные запроса
             creationRequestComp = new(
@@ -52,7 +52,7 @@ namespace SO.Initialization
             //Запрашиваем первичную инициализацию стартового региона агента
             InitializerData.RegionInitializationFirstRequest(
                 world.Value,
-                regionInitializationFirstRequestPool.Value,
+                regionInitializationFirstRPool.Value,
                 requestComp.parentMapPE,
                 world.Value.PackEntity(agentEntity));
         }

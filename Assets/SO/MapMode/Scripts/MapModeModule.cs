@@ -38,7 +38,7 @@ namespace SO.MapMode
             //Обновление списков цветов режимов карты при обновлении списков цветов объектов
             startup.AddPreRenderSystem(new SMapModesUpdateColors());
 
-            //Политический режим карты
+            //Отображение политического режима карты
             startup.AddPreRenderSystemGroup(
                 politicalMapModeName,
                 false,

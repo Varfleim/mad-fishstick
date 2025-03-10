@@ -6,12 +6,15 @@ using UnityEngine;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 using Leopotam.EcsLite.ExtendedSystems;
+using Leopotam.EcsLite.Unity.Ugui;
 
 namespace MF
 {
     public class MFStartup : MonoBehaviour
     {
         EcsWorld world;
+        EcsWorld uguiMapWorld;
+        EcsWorld uguiUIWorld;
 
         EcsSystems preInitSystems;
         EcsSystems initSystems;
@@ -28,6 +31,9 @@ namespace MF
         EcsSystems preTickSystems;
         EcsSystems tickSystems;
         EcsSystems postTickSystems;
+
+        [SerializeField] EcsUguiEmitter uguiMapEmitter;
+        [SerializeField] EcsUguiEmitter uguiUIEmitter;
 
         #region Map
         public GameObject coreObject;
@@ -51,6 +57,8 @@ namespace MF
 
             //Инициализируем мир и группы систем
             world = new EcsWorld();
+            uguiMapWorld = new EcsWorld();
+            uguiUIWorld = new EcsWorld();
 
             preInitSystems = new EcsSystems(world);
             initSystems = new EcsSystems(world);
@@ -96,8 +104,23 @@ namespace MF
             initSystems.Init();
             postInitSystems.Init();
 
+            //preFrameSystems
+            //    .AddWorld(uguiMapWorld, "uguiMapEventsWorld")
+            //    .InjectUgui(uguiMapEmitter, "uguiMapEventsWorld")
+            //    .AddWorld(uguiUIWorld, "uguiUIEventsWorld")
+            //    .InjectUgui(uguiUIEmitter, "uguiUIEventsWorld");
             preFrameSystems.Init();
+            frameSystems
+                .AddWorld(uguiMapWorld, "uguiMapEventsWorld")
+                .InjectUgui(uguiMapEmitter, "uguiMapEventsWorld")
+                .AddWorld(uguiUIWorld, "uguiUIEventsWorld")
+                .InjectUgui(uguiUIEmitter, "uguiUIEventsWorld");
             frameSystems.Init();
+            //postFrameSystems
+            //    .AddWorld(uguiMapWorld, "uguiMapEventsWorld")
+            //    .InjectUgui(uguiMapEmitter, "uguiMapEventsWorld")
+            //    .AddWorld(uguiUIWorld, "uguiUIEventsWorld")
+            //    .InjectUgui(uguiUIEmitter, "uguiUIEventsWorld");
             postFrameSystems.Init();
 
             preRenderSystems.Init();

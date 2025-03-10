@@ -31,8 +31,13 @@ namespace SO.Colonization
                 int landEntity = landEntities[a];
                 ref CLandColony landColony = ref landColonyPool[landColonyIndices[landEntity]];
 
+                //Определяем прогресс колонизации
+                int colonizationProgress = (int)(250 * landColony.ColonizationEfficiency);
+
+                UnityEngine.Debug.LogWarning(colonizationProgress);
+
                 //Увеличиваем прогресс колонизации
-                landColony.AddProgress(500);
+                landColony.AddProgress(colonizationProgress);
             }
         }
     }

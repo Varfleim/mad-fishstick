@@ -367,12 +367,12 @@ namespace HS.Input
             return nearestProvincePE;
         }
 
-        readonly EcsPoolInject<MF.Input.RMousePositionChange> mousePositionChangeRequestPool = default;
+        readonly EcsPoolInject<MF.Input.RMousePositionChange> mousePositionChangeRPool = default;
         void MousePositionRequest()
         {
             //Создаём новую сущность и назначаем ей запрос смены положения курсора
             int requestEntity = world.Value.NewEntity();
-            ref MF.Input.RMousePositionChange requestComp = ref mousePositionChangeRequestPool.Value.Add(requestEntity);
+            ref MF.Input.RMousePositionChange requestComp = ref mousePositionChangeRPool.Value.Add(requestEntity);
 
             //Заполняем данные запроса
             requestComp = new MF.Input.RMousePositionChange(

@@ -16,15 +16,15 @@ namespace HS
             CameraMoving();
         }
 
-        readonly EcsFilterInject<Inc<RHexasphereCameraMoving>> hexasphereCameraMovingRequestFilter = default;
-        readonly EcsPoolInject<RHexasphereCameraMoving> hexasphereCameraMovingRequestPool = default;
+        readonly EcsFilterInject<Inc<RHexasphereCameraMoving>> hexasphereCameraMovingRFilter = default;
+        readonly EcsPoolInject<RHexasphereCameraMoving> hexasphereCameraMovingRPool = default;
         void CameraMoving()
         {
             //Для каждого запроса
-            foreach (int requestEntity in hexasphereCameraMovingRequestFilter.Value)
+            foreach (int requestEntity in hexasphereCameraMovingRFilter.Value)
             {
                 //Берём запрос
-                ref RHexasphereCameraMoving requestComp = ref hexasphereCameraMovingRequestPool.Value.Get(requestEntity);
+                ref RHexasphereCameraMoving requestComp = ref hexasphereCameraMovingRPool.Value.Get(requestEntity);
 
                 //Если запрашивается горизонтальное вращение
                 if (requestComp.isHorizontal == true)
@@ -46,7 +46,7 @@ namespace HS
                 }
 
                 //Удаляем запрос
-                hexasphereCameraMovingRequestPool.Value.Del(requestEntity);
+                hexasphereCameraMovingRPool.Value.Del(requestEntity);
             }
         }
 

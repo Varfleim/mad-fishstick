@@ -13,7 +13,7 @@ namespace MF.Map
         }
 
         readonly EcsFilterInject<Inc<CMapModeCore, CActiveMapMode>> activeMapModeFilter = default;
-        readonly EcsPoolInject<SRMapModeUpdate> mapModeUpdateSelfRequestPool = default;
+        readonly EcsPoolInject<SRMapModeUpdate> mapModeUpdateSRPool = default;
         void MapModeActiveUpdate()
         {
             //ƒл€ каждого активного режима карты
@@ -21,7 +21,7 @@ namespace MF.Map
             {
                 //«апрашиваем обновление режима карты
                 MapModeData.MapModeUpdateRequest(
-                    mapModeUpdateSelfRequestPool.Value,
+                    mapModeUpdateSRPool.Value,
                     activeMapModeEntity);
             }
         }

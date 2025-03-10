@@ -11,8 +11,8 @@ namespace SO.Island
 
         readonly EcsPoolInject<CIsland> islandPool = default;
 
-        readonly EcsFilterInject<Inc<SRIslandCreation>> islandCreationSelfRequestFilter = default;
-        readonly EcsPoolInject<SRIslandCreation> islandCreationSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRIslandCreation>> islandCreationSRFilter = default;
+        readonly EcsPoolInject<SRIslandCreation> islandCreationSRPool = default;
 
         public void Init(IEcsSystems systems)
         {
@@ -23,10 +23,10 @@ namespace SO.Island
         void IslandsCreation()
         {
             //Для каждого запроса создания острова
-            foreach (int islandRequestEntity in islandCreationSelfRequestFilter.Value)
+            foreach (int islandRequestEntity in islandCreationSRFilter.Value)
             {
                 //Берём запрос
-                ref SRIslandCreation requestComp = ref islandCreationSelfRequestPool.Value.Get(islandRequestEntity);
+                ref SRIslandCreation requestComp = ref islandCreationSRPool.Value.Get(islandRequestEntity);
 
                 //Создаём остров
                 IslandCreation(
@@ -37,7 +37,7 @@ namespace SO.Island
                 ref CIsland island = ref islandPool.Value.Get(islandRequestEntity);
 
                 //Удаляем запрос
-                islandCreationSelfRequestPool.Value.Del(islandRequestEntity);
+                islandCreationSRPool.Value.Del(islandRequestEntity);
             }
         }
 

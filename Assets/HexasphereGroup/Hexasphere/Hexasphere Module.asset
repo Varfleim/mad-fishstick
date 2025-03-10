@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hexasphereScale: 100
   extrudeMultiplier: 0.05
+  mapPanelAltitude: 0.2
   provinceMaterial: {fileID: 2100000, guid: 96343935ed939054e94cbbeffbbdb11b, type: 2}
   provinceColoredMaterial: {fileID: 2100000, guid: 4473e82b6f132c04e90da9b0655f678e,
     type: 2}

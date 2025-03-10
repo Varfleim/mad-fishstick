@@ -18,12 +18,12 @@ namespace MF.Map
             MapModesRenderSystemsActivation();
         }
 
-        readonly EcsFilterInject<Inc<CMapModeCore, SRMapModeUpdate>> mapModeUpdateSelfRequestFilter = default;
+        readonly EcsFilterInject<Inc<CMapModeCore, SRMapModeUpdate>> mapModeUpdateSRFilter = default;
         readonly EcsPoolInject<CMapModeCore> mapModeCorePool = default;
         void MapModesRenderSystemsActivation()
         {
             //Для каждого режима карты с запросом обновления
-            foreach (int mapModeEntity in mapModeUpdateSelfRequestFilter.Value)
+            foreach (int mapModeEntity in mapModeUpdateSRFilter.Value)
             {
                 //Берём режим карты
                 ref CMapModeCore mapMode = ref mapModeCorePool.Value.Get(mapModeEntity);

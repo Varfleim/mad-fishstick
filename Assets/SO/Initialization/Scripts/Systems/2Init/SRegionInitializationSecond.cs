@@ -8,8 +8,8 @@ namespace SO.Initialization
     {
         readonly EcsWorldInject world = default;
 
-        readonly EcsFilterInject<Inc<SRRegionInitializationSecond>> regionInitializationSecondSelfRequestFilter = default;
-        readonly EcsPoolInject<SRRegionInitializationSecond> regionInitializationSecondSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRRegionInitializationSecond>> regionInitializationSecondSRFilter = default;
+        readonly EcsPoolInject<SRRegionInitializationSecond> regionInitializationSecondSRPool = default;
 
         public void Init(IEcsSystems systems)
         {
@@ -20,10 +20,10 @@ namespace SO.Initialization
         void RegionsInitializationEffects()
         {
             //Для каждого региона с вторичным инициализатором
-            foreach(int regionRequestEntity in regionInitializationSecondSelfRequestFilter.Value)
+            foreach(int regionRequestEntity in regionInitializationSecondSRFilter.Value)
             {
                 //Берём запрос
-                ref SRRegionInitializationSecond requestComp = ref regionInitializationSecondSelfRequestPool.Value.Get(regionRequestEntity);
+                ref SRRegionInitializationSecond requestComp = ref regionInitializationSecondSRPool.Value.Get(regionRequestEntity);
 
                 //Инициализируем регион
                 RegionInitializationEffects(
@@ -31,11 +31,11 @@ namespace SO.Initialization
                     regionRequestEntity);
 
                 //Удаляем запрос
-                regionInitializationSecondSelfRequestPool.Value.Del(regionRequestEntity);
+                regionInitializationSecondSRPool.Value.Del(regionRequestEntity);
             }
         }
 
-        readonly EcsPoolInject<RIslandInitializationFirst> islandInitializationFirstRequestPool = default;
+        readonly EcsPoolInject<RIslandInitializationFirst> islandInitializationFirstRPool = default;
         void RegionInitializationEffects(
             ref SRRegionInitializationSecond requestComp,
             int regionEntity)
@@ -43,52 +43,52 @@ namespace SO.Initialization
             //Запрашиваем первичную инициализацию острова в регионе
             InitializerData.IslandInitializationFirstRequest(
                 world.Value,
-                islandInitializationFirstRequestPool.Value,
+                islandInitializationFirstRPool.Value,
                 world.Value.PackEntity(regionEntity),
                 requestComp.ownerAgentPE);
             InitializerData.IslandInitializationFirstRequest(
                 world.Value,
-                islandInitializationFirstRequestPool.Value,
+                islandInitializationFirstRPool.Value,
                 world.Value.PackEntity(regionEntity),
                 requestComp.ownerAgentPE);
             InitializerData.IslandInitializationFirstRequest(
                 world.Value,
-                islandInitializationFirstRequestPool.Value,
+                islandInitializationFirstRPool.Value,
                 world.Value.PackEntity(regionEntity),
                 requestComp.ownerAgentPE);
             InitializerData.IslandInitializationFirstRequest(
                 world.Value,
-                islandInitializationFirstRequestPool.Value,
+                islandInitializationFirstRPool.Value,
                 world.Value.PackEntity(regionEntity),
                 requestComp.ownerAgentPE);
             InitializerData.IslandInitializationFirstRequest(
                 world.Value,
-                islandInitializationFirstRequestPool.Value,
+                islandInitializationFirstRPool.Value,
                 world.Value.PackEntity(regionEntity),
                 requestComp.ownerAgentPE);
             //InitializerData.IslandInitializationFirstRequest(
             //    world.Value,
-            //    islandInitializationFirstRequestPool.Value,
+            //    islandInitializationFirstRPool.Value,
             //    world.Value.PackEntity(regionEntity),
             //    requestComp.ownerAgentPE);
             //InitializerData.IslandInitializationFirstRequest(
             //    world.Value,
-            //    islandInitializationFirstRequestPool.Value,
+            //    islandInitializationFirstRPool.Value,
             //    world.Value.PackEntity(regionEntity),
             //    requestComp.ownerAgentPE);
             //InitializerData.IslandInitializationFirstRequest(
             //    world.Value,
-            //    islandInitializationFirstRequestPool.Value,
+            //    islandInitializationFirstRPool.Value,
             //    world.Value.PackEntity(regionEntity),
             //    requestComp.ownerAgentPE);
             //InitializerData.IslandInitializationFirstRequest(
             //    world.Value,
-            //    islandInitializationFirstRequestPool.Value,
+            //    islandInitializationFirstRPool.Value,
             //    world.Value.PackEntity(regionEntity),
             //    requestComp.ownerAgentPE);
             //InitializerData.IslandInitializationFirstRequest(
             //    world.Value,
-            //    islandInitializationFirstRequestPool.Value,
+            //    islandInitializationFirstRPool.Value,
             //    world.Value.PackEntity(regionEntity),
             //    requestComp.ownerAgentPE);
         }

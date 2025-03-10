@@ -9,7 +9,7 @@ namespace SO.Region
         readonly EcsWorldInject world = default;
 
 
-        readonly EcsPoolInject<MF.Map.SRMapModeCreation> mapModeCreationSelfRequestPool = default;
+        readonly EcsPoolInject<MF.Map.SRMapModeCreation> mapModeCreationSRPool = default;
         
         
         readonly EcsCustomInject<MapModeData> mapModeData = default;
@@ -32,7 +32,7 @@ namespace SO.Region
 
             //Запрашиваем назначение главного компонента режима карты
             MF.Map.MapModeData.MapModeCreationRequest(
-                mapModeCreationSelfRequestPool.Value,
+                mapModeCreationSRPool.Value,
                 mapModeEntity, mapModeData.Value.regionMapModeName,
                 false);
         }

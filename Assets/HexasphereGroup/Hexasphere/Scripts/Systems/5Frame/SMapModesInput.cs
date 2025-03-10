@@ -17,7 +17,7 @@ namespace HS
 
         readonly EcsPoolInject<CMapModeCore> mapModeCorePool = default;
 
-        readonly EcsPoolInject<SRShowMapHoverHighlight> showMapHoverHighlightSelfRequestPool = default;
+        readonly EcsPoolInject<SRShowMapHoverHighlight> showMapHoverHighlightSRPool = default;
 
         public void Run(IEcsSystems systems)
         {
@@ -80,7 +80,7 @@ namespace HS
 
             //Запрашиваем для неё подсветку наведения
             MF.Map.MapModeData.ShowMapHoverHighlightRequest(
-                showMapHoverHighlightSelfRequestPool.Value,
+                showMapHoverHighlightSRPool.Value,
                 ref mapMode,
                 provinceEntity);
         }

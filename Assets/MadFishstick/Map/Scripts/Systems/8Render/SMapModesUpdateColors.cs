@@ -11,8 +11,8 @@ namespace MF.Map
 
         readonly EcsPoolInject<CMapModeCore> mapModeCorePool = default;
 
-        readonly EcsFilterInject<Inc<RMapModeUpdateColorsListSecond>> mapModeUpdateColorsListSecondRequestFilter = default;
-        readonly EcsPoolInject<RMapModeUpdateColorsListSecond> mapModeUpdateColorsListSecondRequestPool = default;
+        readonly EcsFilterInject<Inc<RMapModeUpdateColorsListSecond>> mapModeUpdateColorsListSecondRFilter = default;
+        readonly EcsPoolInject<RMapModeUpdateColorsListSecond> mapModeUpdateColorsListSecondRPool = default;
 
         public void Run(IEcsSystems systems)
         {
@@ -23,10 +23,10 @@ namespace MF.Map
         void MapModesUpdateColorsListSecond()
         {
             //Для каждого запроса вторичного обновления списка цветов режима карты
-            foreach (int requestEntity in mapModeUpdateColorsListSecondRequestFilter.Value)
+            foreach (int requestEntity in mapModeUpdateColorsListSecondRFilter.Value)
             {
                 //Берём запрос
-                ref RMapModeUpdateColorsListSecond requestComp = ref mapModeUpdateColorsListSecondRequestPool.Value.Get(requestEntity);
+                ref RMapModeUpdateColorsListSecond requestComp = ref mapModeUpdateColorsListSecondRPool.Value.Get(requestEntity);
 
                 //Берём режим карты
                 requestComp.mapModePE.Unpack(world.Value, out int mapModeEntity);
@@ -38,7 +38,7 @@ namespace MF.Map
                     ref requestComp);
 
                 //Удаляем запрос
-                mapModeUpdateColorsListSecondRequestPool.Value.Del(requestEntity);
+                mapModeUpdateColorsListSecondRPool.Value.Del(requestEntity);
             }
         }
 

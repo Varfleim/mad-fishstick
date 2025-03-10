@@ -26,7 +26,7 @@ namespace HS
             }
         }
 
-        readonly EcsPoolInject<SRUpdateProvinceRender> setMapRenderValuesSelfRequestPool = default;
+        readonly EcsPoolInject<SRUpdateProvinceRender> setMapRenderValuesSRPool = default;
         void SetMapRenderValuesRequests(
             ref CMap map)
         {
@@ -38,7 +38,7 @@ namespace HS
 
                 //Создаём запрос обновления визуализации для неё
                 MF.Map.MapModeData.UpdateProvinceRenderRequestCreation(
-                    setMapRenderValuesSelfRequestPool.Value,
+                    setMapRenderValuesSRPool.Value,
                     provinceEntity);
             }
         }

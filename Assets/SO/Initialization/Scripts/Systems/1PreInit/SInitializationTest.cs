@@ -9,9 +9,9 @@ namespace SO.Initialization
         readonly EcsWorldInject world = default;
 
 
-        readonly EcsPoolInject<SRMapInitialization> mapInitializationSelfRequestPool = default;
+        readonly EcsPoolInject<SRMapInitialization> mapInitializationSRPool = default;
 
-        readonly EcsPoolInject<SRAgentInitialization> agentInitializationSelfRequestPool = default;
+        readonly EcsPoolInject<SRAgentInitialization> agentInitializationSRPool = default;
 
 
         readonly EcsCustomInject<InitializerData> initializerData = default;
@@ -26,7 +26,7 @@ namespace SO.Initialization
             {
                 //Создаём новую сущность и назначаем ей запрос инициализации карты
                 int requestEntity = world.Value.NewEntity();
-                ref SRMapInitialization requestComp = ref mapInitializationSelfRequestPool.Value.Add(requestEntity);
+                ref SRMapInitialization requestComp = ref mapInitializationSRPool.Value.Add(requestEntity);
 
                 //Заполняем данные запроса
                 requestComp = new(
@@ -42,7 +42,7 @@ namespace SO.Initialization
             {
                 //Создаём новую сущность и назначаем ей запрос инициализации агента
                 int requestEntity = world.Value.NewEntity();
-                ref SRAgentInitialization requestComp = ref agentInitializationSelfRequestPool.Value.Add(requestEntity);
+                ref SRAgentInitialization requestComp = ref agentInitializationSRPool.Value.Add(requestEntity);
 
                 //Заполняем данные запроса
                 requestComp = new(

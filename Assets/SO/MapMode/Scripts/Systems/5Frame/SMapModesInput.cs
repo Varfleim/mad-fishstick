@@ -3,9 +3,11 @@ using Leopotam.EcsLite;
 using Leopotam.EcsLite.Di;
 
 using MF.Input;
+using GS.UI;
 using MF.Map;
 using SO.Island;
 using SO.LandOwnership;
+using SO.GameUI;
 
 namespace SO.MapMode
 {
@@ -24,6 +26,7 @@ namespace SO.MapMode
 
         readonly EcsPoolInject<CAgentLandOwner> aLandOwnerPool = default;
 
+
         readonly EcsFilterInject<Inc<RMouseMapPositionCheck>> mouseMapPositionCheckRFilter = default;
         readonly EcsPoolInject<RMouseMapPositionCheck> mouseMapPositionCheckRPool = default;
 
@@ -31,6 +34,8 @@ namespace SO.MapMode
         readonly EcsPoolInject<RMouseMapClickCheck> mouseMapClickCheckRPool = default;
 
         readonly EcsPoolInject<SRShowMapHoverHighlight> showMapHoverHighlightSRPool = default;
+
+        readonly EcsPoolInject<RObjectSubpanelTabShow> objectSubpanelTabShowRPool = default;
 
 
         readonly EcsCustomInject<MapModeData> mapModeData = default;
@@ -141,13 +146,24 @@ namespace SO.MapMode
                 UnityEngine.Debug.LogWarning(aLandOwner.ownedLandPEs.Count + " !");
             }
             //Иначе, если провинция имеет компонент острова
-            else if (islandPool.Value.Has(provinceEntity))
+            else if (islandPool.Value.Has(provinceEntity) == true)
             {
                 //Запрашиваем для неё колонизацию
                 SO.Colonization.ColonizationData.LandColonizeRequest(
                     world.Value,
                     landColonizeRPool.Value,
                     mapModeData.Value.lastAgentPE,
+                    requestComp.currentProvincePE);
+            }
+
+            //Если провинция имеет компонент острова
+            if(islandPool.Value.Has(provinceEntity) == true)
+            {
+                //Запрашиваем отображение подпанели острова
+                UIData.ShowObjectSubpanelTabRequest(
+                    world.Value,
+                    objectSubpanelTabShowRPool.Value,
+                    GameUIData.islandObjectSubpanelType, GameUIData.islandOSbpnOverviewTabType,
                     requestComp.currentProvincePE);
             }
         }

@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdb2642b03f65c649bbec6bbd7e535ad, type: 3}
   m_Name: Map Module
   m_EditorClassIdentifier: 
-  mapNames:
-  - TestMap
+  mapPanelAltitude: 0.2
   provinceGOPrefab: {fileID: 5274550238540852245, guid: bb1c207c759f2d641af6eac2d6586f31,
     type: 3}
   provinceHighlightGOPrefab: {fileID: 6492647641375642767, guid: d4780a189111938468551d5985ec2e89,
+    type: 3}
+  provinceMapPanelGroupPrefab: {fileID: 7496931896886670155, guid: 91cf15772c5a2b54e9a10c8cac8d7044,
     type: 3}

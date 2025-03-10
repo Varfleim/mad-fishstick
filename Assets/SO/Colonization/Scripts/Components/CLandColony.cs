@@ -12,12 +12,26 @@ namespace SO.Colonization
 
             ownerPE = new();
 
+            colonizationEfficiency = 1f;
             colonizationProgress = 0;
         }
 
         public readonly EcsPackedEntity selfPE;
 
         public EcsPackedEntity ownerPE;
+
+        public float ColonizationEfficiency
+        {
+            get
+            {
+                return colonizationEfficiency;
+            }
+            internal set
+            {
+                colonizationEfficiency = value;
+            }
+        }
+        float colonizationEfficiency;
 
         public int ColonizationProgress
         {

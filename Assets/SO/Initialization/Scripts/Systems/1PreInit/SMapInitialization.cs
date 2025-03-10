@@ -18,15 +18,15 @@ namespace SO.Initialization
             MapsInitialization();
         }
 
-        readonly EcsFilterInject<Inc<SRMapInitialization>> mapInitializationSelfRequestFilter = default;
-        readonly EcsPoolInject<SRMapInitialization> mapInitializationSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRMapInitialization>> mapInitializationSRFilter = default;
+        readonly EcsPoolInject<SRMapInitialization> mapInitializationSRPool = default;
         void MapsInitialization()
         {
             //Для каждого запроса инициализации карты
-            foreach(int mapRequestEntity in mapInitializationSelfRequestFilter.Value)
+            foreach(int mapRequestEntity in mapInitializationSRFilter.Value)
             {
                 //Берём запрос
-                ref SRMapInitialization requestComp = ref mapInitializationSelfRequestPool.Value.Get(mapRequestEntity);
+                ref SRMapInitialization requestComp = ref mapInitializationSRPool.Value.Get(mapRequestEntity);
 
                 //Инициализируем карту
                 MapInitialization(
@@ -34,26 +34,26 @@ namespace SO.Initialization
                     mapRequestEntity);
 
                 //Удаляем запрос
-                mapInitializationSelfRequestPool.Value.Del(mapRequestEntity);
+                mapInitializationSRPool.Value.Del(mapRequestEntity);
             }
         }
 
-        readonly EcsPoolInject<SRMapCreation> mapCreationSelfRequestPool = default;
-        readonly EcsPoolInject<SRHexasphereGeneration> hexasphereGenerationSelfRequestPool = default;
-        readonly EcsPoolInject<SRRegionsGeneration> regionsGenerationSelfRequestPool = default;
+        readonly EcsPoolInject<SRMapCreation> mapCreationSRPool = default;
+        readonly EcsPoolInject<SRHexasphereGeneration> hexasphereGenerationSRPool = default;
+        readonly EcsPoolInject<SRRegionsGeneration> regionsGenerationSRPool = default;
         void MapInitialization(
             ref SRMapInitialization requestComp,
             int mapEntity)
         {
             //Назначаем сущности запрос создания карты
-            ref SRMapCreation mapCreationRequestComp = ref mapCreationSelfRequestPool.Value.Add(mapEntity);
+            ref SRMapCreation mapCreationRequestComp = ref mapCreationSRPool.Value.Add(mapEntity);
 
             //Заполняем данные запроса
             mapCreationRequestComp = new(
                 requestComp.mapName);
 
             //Назначаем сущности запрос генерации гексасферы
-            ref SRHexasphereGeneration hexasphereGenerationRequestComp = ref hexasphereGenerationSelfRequestPool.Value.Add(mapEntity);
+            ref SRHexasphereGeneration hexasphereGenerationRequestComp = ref hexasphereGenerationSRPool.Value.Add(mapEntity);
 
             //Заполняем данные запроса
             hexasphereGenerationRequestComp = new(
@@ -61,7 +61,7 @@ namespace SO.Initialization
                 requestComp.hexasphereSubdivisions);
 
             //Назначаем сущности запрос генерации регионов
-            ref SRRegionsGeneration regionsGenerationRequestComp = ref regionsGenerationSelfRequestPool.Value.Add(mapEntity);
+            ref SRRegionsGeneration regionsGenerationRequestComp = ref regionsGenerationSRPool.Value.Add(mapEntity);
 
             //Заполняем данные запроса
             regionsGenerationRequestComp = new(

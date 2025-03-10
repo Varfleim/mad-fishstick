@@ -18,11 +18,13 @@ namespace HS
         readonly EcsPoolInject<CProvinceCore> pCPool = default;
         readonly EcsPoolInject<CProvinceRender> pRPool = default;
         readonly EcsPoolInject<CProvinceHexasphere> pHSPool = default;
+        readonly EcsPoolInject<CProvinceMapPanels> pMPPool = default;
 
         readonly EcsFilterInject<Inc<CMapModeCore, CActiveMapMode>> activeMapModeFilter = default;
         readonly EcsPoolInject<CMapModeCore> mapModeCorePool = default;
 
 
+        readonly EcsCustomInject<ProvinceData> provinceData = default;
         readonly EcsCustomInject<HexasphereData> hexasphereData = default;
 
         public void Run(IEcsSystems systems)
@@ -42,6 +44,9 @@ namespace HS
             //Подсветка наведения
             HoverHighlight();
 
+            //Проверяем запросы изменения положения панелей карты
+            MapPanels();
+
             //Проверяем, нет ли пустых GO провинций для удаления
             ProvinceGOEmptyCheck();
         }
@@ -56,7 +61,7 @@ namespace HS
                 //Берём запрос
                 ref RMapRenderInitialization requestComp = ref mapRenderInitializationRPool.Value.Get(requestEntity);
 
-                //Находим сущность активног7о режима карты
+                //Находим сущность активного режима карты
                 int activeMapModeEntity = -1;
 
                 //Для каждого активного режима карты
@@ -150,6 +155,9 @@ namespace HS
 
                     //Обновляем меши подсветки провинций
                     ProvinceHighlightMeshesUpdate();
+
+                    //Обновляем панели карты провинций
+                    ProvinceMapPanelsAltitudeUpdate();
                 }
 
                 //Если требуется обновление цветов
@@ -1437,24 +1445,6 @@ namespace HS
             }
         }
 
-        readonly EcsFilterInject<Inc<CProvinceRender, CProvinceHexasphere, CProvinceHoverHighlight>> provinceHoverHighlightMeshUpdateFilter = default;
-        void ProvinceHighlightMeshesUpdate()
-        {
-            //Для каждой провинции с компонентом подсветки наведения
-            foreach(int provinceEntity in provinceHoverHighlightMeshUpdateFilter.Value)
-            {
-                //Берём провинцию
-                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
-                ref CProvinceHexasphere pHS = ref pHSPool.Value.Get(provinceEntity);
-                ref CProvinceHoverHighlight pHoverHighlight = ref provinceHoverHighlightPool.Value.Get(provinceEntity);
-
-                //Обновляем меш подсветки
-                ProvinceHighlightMeshUpdate(
-                    ref pR, ref pHS,
-                    pHoverHighlight.highlight);
-            }
-        }
-
         void ProvinceHighlightMeshCreation(
             ref CProvinceRender pR, ref CProvinceHexasphere pHS,
             GOProvinceHighlight provinceHighlight)
@@ -1507,6 +1497,24 @@ namespace HS
             provinceHighlight.meshRenderer.enabled = true;
         }
 
+        readonly EcsFilterInject<Inc<CProvinceRender, CProvinceHexasphere, CProvinceHoverHighlight>> provinceHoverHighlightMeshUpdateFilter = default;
+        void ProvinceHighlightMeshesUpdate()
+        {
+            //Для каждой провинции с компонентом подсветки наведения
+            foreach (int provinceEntity in provinceHoverHighlightMeshUpdateFilter.Value)
+            {
+                //Берём провинцию
+                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+                ref CProvinceHexasphere pHS = ref pHSPool.Value.Get(provinceEntity);
+                ref CProvinceHoverHighlight pHoverHighlight = ref provinceHoverHighlightPool.Value.Get(provinceEntity);
+
+                //Обновляем меш подсветки
+                ProvinceHighlightMeshUpdate(
+                    ref pR, ref pHS,
+                    pHoverHighlight.highlight);
+            }
+        }
+
         void ProvinceHighlightMeshUpdate(
             ref CProvinceRender pR, ref CProvinceHexasphere pHS,
             GOProvinceHighlight provinceHighlight)
@@ -1534,6 +1542,159 @@ namespace HS
             //Обновляем меш мешфильтра
             provinceHighlight.meshFilter.sharedMesh = null;
             provinceHighlight.meshFilter.sharedMesh = mesh;
+        }
+
+        void MapPanels()
+        {
+            //Изменяем родительские объекты панелей карты
+            SetParentProvinceMapPanels();
+
+            //Проверяем, нет ли провинций без панелей карты, но с компонентом
+            ProvinceMapPanelsEmptyCheck();
+
+            //Поворачиваем панели карты
+            ProvinceMapPanelsUpdate();
+        }
+
+        readonly EcsFilterInject<Inc<RProvinceMapPanelSetParent>> provinceMapPanelSetParentRFilter = default;
+        readonly EcsPoolInject<RProvinceMapPanelSetParent> provinceMapPanelSetParentRPool = default;
+        void SetParentProvinceMapPanels()
+        {
+            //Для каждого запроса изменения родителя панели карты
+            foreach (int requestEntity in provinceMapPanelSetParentRFilter.Value)
+            {
+                //Берём запрос
+                ref RProvinceMapPanelSetParent requestComp = ref provinceMapPanelSetParentRPool.Value.Get(requestEntity);
+
+                //Изменяем родителя панели карты
+                ProvinceMapPanelSetParent(ref requestComp);
+
+                //Удаляем запрос
+                provinceMapPanelSetParentRPool.Value.Del(requestEntity);
+            }
+        }
+
+        void ProvinceMapPanelSetParent(
+            ref RProvinceMapPanelSetParent requestComp)
+        {
+            //Берём целевую провинцию
+            requestComp.parentProvincePE.Unpack(world.Value, out int provinceEntity);
+            ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+            ref CProvinceHexasphere pHS = ref pHSPool.Value.Get(provinceEntity);
+
+            //Если провинция не имеет GO
+            if (pR.ProvinceGO == null)
+            {
+                //Создаём его
+                GOProvince.InstantiateProvinceGO(
+                    HexasphereData.provincesRootGO,
+                    ref pR);
+            }
+
+            //Если провинция не имеет компонента панелей карты
+            if(pMPPool.Value.Has(provinceEntity) == false)
+            {
+                //Назначаем компонент
+                ProvinceMapPanelsCreate(
+                    provinceEntity,
+                    ref pR, ref pHS);
+            }
+
+            //Берём компонент панелей карты
+            ref CProvinceMapPanels pMP = ref pMPPool.Value.Get(provinceEntity);
+
+            //Присоединяем переданную панель к группе панелей провинции
+            requestComp.mapPanelGO.transform.SetParent(pMP.mapPanelGroup.transform);
+            requestComp.mapPanelGO.transform.localPosition = Vector3.zero;
+        }
+
+        void ProvinceMapPanelsCreate(
+            int provinceEntity,
+            ref CProvinceRender pR, ref CProvinceHexasphere pHS)
+        {
+            //Назначаем сущности провинции компонент панелей карты
+            ref CProvinceMapPanels pMP = ref pMPPool.Value.Add(provinceEntity);
+
+            //Заполняем данные компонента
+            pMP = new(0);
+
+            //Определяем центр провинции
+            Vector3 provinceCenter = pHS.center;
+            provinceCenter *= 1.0f + pR.ProvinceHeight * HexasphereData.ExtrudeMultiplier;
+            provinceCenter *= hexasphereData.Value.hexasphereScale;
+
+            //Создаём группу панелей карты
+            CProvinceMapPanels.InstantiateMapPanelGroup(
+                ref pR, ref pMP,
+                provinceCenter,
+                provinceData.Value.mapPanelAltitude);
+        }
+
+        readonly EcsFilterInject<Inc<CProvinceRender, CProvinceMapPanels>> pMPFilter = default;
+        void ProvinceMapPanelsEmptyCheck()
+        {
+            //Для каждой провинции с компонентом панелей карты
+            foreach(int provinceEntity in pMPFilter.Value)
+            {
+                //Берём компонент панелей карты
+                ref CProvinceMapPanels pMP = ref pMPPool.Value.Get(provinceEntity);
+
+                //Если провинция не имеет панелей карты
+                if(pMP.mapPanelGroup.transform.childCount == 0)
+                {
+                    //Кэшируем группу панелей
+                    CProvinceMapPanels.CacheMapPanelGroup(ref pMP);
+
+                    //Удаляем с сущности компонент панелей карты
+                    pMPPool.Value.Del(provinceEntity);
+                }
+            }
+        }
+
+        void ProvinceMapPanelsAltitudeUpdate()
+        {
+            //Для каждой провинции с компонентом панелей карты
+            foreach (int provinceEntity in pMPFilter.Value)
+            {
+                //Берём компоненты провинции
+                ref CProvinceRender pR = ref pRPool.Value.Get(provinceEntity);
+                ref CProvinceHexasphere pHS = ref pHSPool.Value.Get(provinceEntity);
+                ref CProvinceMapPanels pMP = ref pMPPool.Value.Get(provinceEntity);
+
+                //Определяем положение центра провинции
+                Vector3 provinceCenter = pHS.center;
+                provinceCenter *= 1.0f + pR.ProvinceHeight * HexasphereData.ExtrudeMultiplier;
+                provinceCenter *= hexasphereData.Value.hexasphereScale;
+
+                //Задаём положение группы панелей
+                CProvinceMapPanels.CalculateMapPanelGroupPosition(
+                    ref pMP,
+                    provinceCenter,
+                    provinceData.Value.mapPanelAltitude);
+            }
+        }
+
+        void ProvinceMapPanelsUpdate()
+        {
+            //Для каждой провинции с компонентом панелей карты
+            foreach (int provinceEntity in pMPFilter.Value)
+            {
+                //Берём компонент панелей карты
+                ref CProvinceMapPanels pMP = ref pMPPool.Value.Get(provinceEntity);
+
+                float d = Vector3.Dot(
+                    Camera.main.transform.position.normalized,
+                    pMP.mapPanelGroup.transform.position.normalized);
+
+                pMP.mapPanelGroup.transform.LookAt(Vector3.zero, Vector3.up);
+                d = Mathf.Clamp01(d);
+                pMP.mapPanelGroup.transform.rotation = Quaternion.Lerp(
+                    pMP.mapPanelGroup.transform.rotation,
+                    Quaternion.LookRotation(
+                        pMP.mapPanelGroup.transform.position - Camera.main.transform.position,
+                        Camera.main.transform.up),
+                    d);
+            }
         }
 
         void ProvinceGOEmptyCheck()

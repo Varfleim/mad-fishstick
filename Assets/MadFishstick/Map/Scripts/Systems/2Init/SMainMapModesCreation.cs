@@ -16,15 +16,15 @@ namespace MF.Map
             MapModesCreation();
         }
 
-        readonly EcsFilterInject<Inc<SRMapModeCreation>> mapModeCreationSelfRequestFilter = default;
-        readonly EcsPoolInject<SRMapModeCreation> mapModeCreationSelfRequestPool = default;
+        readonly EcsFilterInject<Inc<SRMapModeCreation>> mapModeCreationSRFilter = default;
+        readonly EcsPoolInject<SRMapModeCreation> mapModeCreationSRPool = default;
         void MapModesCreation()
         {
             //Для каждого запроса создания режима карты
-            foreach(int mapModeEntity in mapModeCreationSelfRequestFilter.Value)
+            foreach(int mapModeEntity in mapModeCreationSRFilter.Value)
             {
                 //Берём запрос
-                ref SRMapModeCreation requestComp = ref mapModeCreationSelfRequestPool.Value.Get(mapModeEntity);
+                ref SRMapModeCreation requestComp = ref mapModeCreationSRPool.Value.Get(mapModeEntity);
 
                 //Создаём режим карты по запросу
                 MapModeCreation(
@@ -42,7 +42,7 @@ namespace MF.Map
                 }
 
                 //Удаляем запрос
-                mapModeCreationSelfRequestPool.Value.Del(mapModeEntity);
+                mapModeCreationSRPool.Value.Del(mapModeEntity);
             }
         }
 
